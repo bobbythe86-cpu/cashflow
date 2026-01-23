@@ -18,7 +18,7 @@ import { Users, MessageSquare, ShieldCheck, Mail, Clock } from "lucide-react"
 
 // Simple Badge component mapping
 function StatusBadge({ status }: { status: string }) {
-    const variants: Record<string, any> = {
+    const variants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
         pending: "outline",
         reviewed: "secondary",
         implemented: "default",
@@ -169,6 +169,3 @@ export default async function AdminPage() {
     )
 }
 
-function cn(...inputs: (string | boolean | undefined | null)[]) {
-    return inputs.filter(Boolean).join(" ")
-}

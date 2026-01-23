@@ -1,0 +1,10 @@
+﻿
+C:\Ai projektek\Cashflow\src\app\(dashboard)\admin\page.tsx
+   21:36  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  172:10  error  'cn' is defined but never used            @typescript-eslint/no-unused-vars
+
+C:\Ai projektek\Cashflow\src\app\layout.tsx
+  38:3  error  Parsing error: Invalid character
+
+Ôťľ 3 problems (3 errors, 0 warnings)
+
