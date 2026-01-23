@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Receipt, PiggyBank, Settings, LogOut, TrendingUp, Repeat } from 'lucide-react'
+import { LayoutDashboard, Receipt, PiggyBank, Settings, LogOut, TrendingUp, Repeat, ShieldCheck } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { logout } from '@/actions/auth'
@@ -16,8 +16,12 @@ const menuItems = [
     { name: 'Beállítások', icon: Settings, href: '/settings' },
 ]
 
-export function Sidebar() {
+export function Sidebar({ role }: { role?: string }) {
     const pathname = usePathname()
+
+    const allItems = role === 'admin'
+        ? [...menuItems, { name: 'Admin', icon: ShieldCheck, href: '/admin' }]
+        : menuItems
 
     return (
         <div className="hidden lg:flex flex-col w-64 bg-card border-r h-screen sticky top-0">
@@ -28,7 +32,7 @@ export function Sidebar() {
             </div>
 
             <nav className="flex-1 px-4 space-y-2">
-                {menuItems.map((item) => (
+                {allItems.map((item) => (
                     <Link
                         key={item.name}
                         href={item.href}
