@@ -1,0 +1,60 @@
+﻿
+> next-app@0.1.0 build
+> next build
+
+  Ôľ▓ Next.js 14.2.35
+  - Environments: .env.local
+
+   Creating an optimized production build ...
+node.exe : <w> [webpack.cach
+e.PackFileCacheStrategy] Ser
+ializing big strings (131kiB
+) impacts deserialization pe
+rformance (consider using Bu
+ffer instead and decode when
+ needed)
+At line:1 char:1
++ & "C:\Program Files\nodejs
+/node.exe" "C:\Program Files
+\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~
+    + CategoryInfo          
+    : NotSpecified: (<w> [  
+  webpack.ca...de when ne   
+ eded):String) [], Remot    
+eException
+    + FullyQualifiedErrorId 
+    : NativeCommandError
+ 
+ Ôťô Compiled successfully
+   Linting and checking validity of types ...
+
+Failed to compile.
+
+./src/actions/profile.ts
+13:19  Error: 'error' is ass
+igned a value but never used
+.  @typescript-eslint/no-unu
+sed-vars
+
+./src/app/(dashboard)/admin/
+page.tsx
+21:36  Error: Unexpected any
+. Specify a different type. 
+ @typescript-eslint/no-expli
+cit-any
+172:10  Error: 'cn' is defin
+ed but never used.  @typescr
+ipt-eslint/no-unused-vars
+172:24  Error: Unexpected an
+y. Specify a different type.
+  @typescript-eslint/no-expl
+icit-any
+
+info  - Need to disable some
+ ESLint rules? Learn more he
+re: https://nextjs.org/docs/
+basic-features/eslint#disabl
+ing-rules
