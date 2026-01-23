@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { MessageSquare, Send, X, Lightbulb, CheckCircle2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Textarea } from '@/components/ui/Textarea'
+import { Textarea } from '@/components/ui/textarea'
 import { cn } from '@/lib/utils'
 import { createSuggestion } from '@/actions/suggestions'
 
