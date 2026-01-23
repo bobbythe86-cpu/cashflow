@@ -56,3 +56,4 @@ export interface DashboardStats {
     recentTransactions: Transaction[];
     chartData: { date: string; amount: number; type: TransactionType }[];
 }
+export * from './suggestions';
