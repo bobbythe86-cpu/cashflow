@@ -2,7 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
-import { TransactionType } from '@/types'
+import { TransactionType, Transaction } from '@/types'
 import { syncRecurringTransactions } from './recurring'
 
 // Segédfüggvény a konfiguráció ellenőrzéséhez
@@ -11,12 +11,12 @@ const isConfigured = () =>
     !process.env.NEXT_PUBLIC_SUPABASE_URL.includes('your-project')
 
 const MOCK_TRANSACTIONS = [
-    { id: '1', amount: 450000, description: 'Havi fizetés', date: '2024-01-20', type: 'income', category: { name: 'Fizetés' } },
-    { id: '2', amount: 120000, description: 'Albérlet', date: '2024-01-05', type: 'expense', category: { name: 'Lakhatás' } },
-    { id: '3', amount: 15000, description: 'Bevásárlás', date: '2024-01-18', type: 'expense', category: { name: 'Étel' } },
-    { id: '4', amount: 8000, description: 'Netflix', date: '2024-01-10', type: 'expense', category: { name: 'Szórakozás' } },
-    { id: '5', amount: 25000, description: 'Vacsora', date: '2024-01-22', type: 'expense', category: { name: 'Étel' } },
-]
+    { id: '1', user_id: 'demo', category_id: '1', amount: 450000, description: 'Havi fizetés', date: '2024-01-20', type: 'income' as const, created_at: new Date().toISOString(), category: { id: '1', user_id: 'demo', name: 'Fizetés', type: 'income' as const, icon: 'wallet', color: 'blue', created_at: new Date().toISOString() } },
+    { id: '2', user_id: 'demo', category_id: '2', amount: 120000, description: 'Albérlet', date: '2024-01-05', type: 'expense' as const, created_at: new Date().toISOString(), category: { id: '2', user_id: 'demo', name: 'Lakhatás', type: 'expense' as const, icon: 'home', color: 'red', created_at: new Date().toISOString() } },
+    { id: '3', user_id: 'demo', category_id: '3', amount: 15000, description: 'Bevásárlás', date: '2024-01-18', type: 'expense' as const, created_at: new Date().toISOString(), category: { id: '3', user_id: 'demo', name: 'Étel', type: 'expense' as const, icon: 'shopping-cart', color: 'green', created_at: new Date().toISOString() } },
+    { id: '4', user_id: 'demo', category_id: '4', amount: 8000, description: 'Netflix', date: '2024-01-10', type: 'expense' as const, created_at: new Date().toISOString(), category: { id: '4', user_id: 'demo', name: 'Szórakozás', type: 'expense' as const, icon: 'play', color: 'purple', created_at: new Date().toISOString() } },
+    { id: '5', user_id: 'demo', category_id: '3', amount: 25000, description: 'Vacsora', date: '2024-01-22', type: 'expense' as const, created_at: new Date().toISOString(), category: { id: '3', user_id: 'demo', name: 'Étel', type: 'expense' as const, icon: 'shopping-cart', color: 'green', created_at: new Date().toISOString() } },
+] as Transaction[]
 
 export async function getTransactions() {
     if (!isConfigured()) return MOCK_TRANSACTIONS
@@ -42,7 +42,7 @@ export async function getTransactions() {
 
 export async function getDashboardStats() {
     await syncRecurringTransactions()
-    let transactions: any[] = []
+    let transactions: Transaction[] = []
 
     if (isConfigured()) {
         const supabase = createClient()

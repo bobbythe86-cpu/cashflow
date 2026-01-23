@@ -100,7 +100,7 @@ export function TransactionTable({ transactions }: TransactionTableProps) {
                     />
                 </div>
                 <div className="flex gap-2 w-full sm:w-auto">
-                    <Select value={typeFilter} onValueChange={(v: any) => setTypeFilter(v)}>
+                    <Select value={typeFilter} onValueChange={(v: 'all' | 'income' | 'expense') => setTypeFilter(v)}>
                         <SelectTrigger className="w-[130px] glass">
                             <SelectValue placeholder="Típus" />
                         </SelectTrigger>

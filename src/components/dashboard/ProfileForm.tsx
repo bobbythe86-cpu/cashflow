@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { updateProfile } from '@/actions/profile'
 import { Profile } from '@/types'
-import { toast } from 'sonner' // Assuming the user might want toast later, for now alert or simple state
+
 
 interface ProfileFormProps {
     profile: Profile

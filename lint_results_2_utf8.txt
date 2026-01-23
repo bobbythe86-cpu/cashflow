@@ -1,0 +1,12 @@
+﻿
+C:\Ai projektek\Cashflow\src\components\dashboard\CategoryPieChart.tsx
+  48:44  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Ai projektek\Cashflow\src\components\dashboard\MonthlyComparison.tsx
+  53:44  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Ai projektek\Cashflow\src\components\dashboard\OverviewChart.tsx
+  58:44  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+Ôťľ 3 problems (3 errors, 0 warnings)
+

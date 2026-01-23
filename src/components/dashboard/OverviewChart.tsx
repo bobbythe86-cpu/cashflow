@@ -1,6 +1,6 @@
 'use client'
 
-import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Cell, Area, AreaChart, CartesianGrid } from "recharts"
+import { ResponsiveContainer, XAxis, YAxis, Tooltip, Area, AreaChart, CartesianGrid } from "recharts"
 
 interface OverviewChartProps {
     data: { date: string; amount: number; type: string }[]
@@ -55,7 +55,7 @@ export function OverviewChart({ data }: OverviewChartProps) {
                         tickFormatter={(value) => `${value} Ft`}
                     />
                     <Tooltip
-                        formatter={(value: number) => [`${value.toLocaleString()} Ft`]}
+                        formatter={(value: number | undefined) => [`${(value ?? 0).toLocaleString()} Ft`, 'Összeg']}
                         labelFormatter={(label) => new Date(label).toLocaleDateString('hu-HU', { year: 'numeric', month: 'long', day: 'numeric' })}
                         contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }}
                     />

@@ -2,7 +2,7 @@
 
 import { Transaction } from "@/types"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts"
-import { format, startOfMonth, parseISO } from "date-fns"
+import { format } from "date-fns"
 import { hu } from 'date-fns/locale'
 
 interface MonthlyComparisonProps {
@@ -50,7 +50,7 @@ export function MonthlyComparison({ transactions }: MonthlyComparisonProps) {
                         tick={{ fontSize: 12 }}
                     />
                     <Tooltip
-                        formatter={(value: number) => `${value.toLocaleString()} Ft`}
+                        formatter={(value: number | undefined) => [`${(value ?? 0).toLocaleString()} Ft`, 'Összeg']}
                         cursor={{ fill: 'rgba(0,0,0,0.05)' }}
                         contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }}
                     />

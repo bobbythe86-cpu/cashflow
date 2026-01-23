@@ -45,7 +45,7 @@ export function CategoryPieChart({ transactions }: CategoryPieChartProps) {
                         ))}
                     </Pie>
                     <Tooltip
-                        formatter={(value: number) => `${value.toLocaleString()} Ft`}
+                        formatter={(value: number | undefined) => [`${(value ?? 0).toLocaleString()} Ft`, 'Összeg']}
                         contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }}
                     />
                     <Legend iconType="circle" />

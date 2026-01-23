@@ -1,4 +1,3 @@
-import { Suspense } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { getDashboardStats } from "@/actions/transactions"
 import { ArrowUpRight, ArrowDownRight, Wallet, History, PiggyBank as PiggyBankIcon } from 'lucide-react'
