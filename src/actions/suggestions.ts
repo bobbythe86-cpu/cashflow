@@ -1,7 +1,6 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
-import { revalidatePath } from 'next/cache'
 
 export async function createSuggestion(content: string) {
     if (!content || content.trim().length === 0) {

@@ -1,0 +1,37 @@
+﻿
+> next-app@0.1.0 build
+> next build
+
+  Ôľ▓ Next.js 14.2.35
+  - Environments: .env.local
+
+   Creating an optimized production build ...
+ Ôťô Compiled successfully
+   Linting and checking validity of types ...
+node.exe : 
+At line:1 char:1
++ & "C:\Program Files\nodejs
+/node.exe" "C:\Program Files
+\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~
+    + CategoryInfo          
+    : NotSpecified: (:Stri  
+  ng) [], RemoteException
+    + FullyQualifiedErrorId 
+    : NativeCommandError
+ 
+Failed to compile.
+
+./src/app/layout.tsx
+4:10  Error: 'FeedbackWidget
+' is defined but never used.
+  @typescript-eslint/no-unus
+ed-vars
+
+info  - Need to disable some
+ ESLint rules? Learn more he
+re: https://nextjs.org/docs/
+basic-features/eslint#disabl
+ing-rules

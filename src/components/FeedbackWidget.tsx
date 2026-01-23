@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { MessageSquare, Send, X, Lightbulb, CheckCircle2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Textarea } from '@/components/ui/textarea'
+import { Textarea } from '@/components/ui/Textarea'
 import { cn } from '@/lib/utils'
 import { createSuggestion } from '@/actions/suggestions'
 
@@ -69,7 +69,7 @@ export function FeedbackWidget() {
                             <Textarea
                                 placeholder="Írja le javaslatát..."
                                 value={content}
-                                onChange={(e) => setContent(e.target.value)}
+                                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setContent(e.target.value)}
                                 className="min-h-[120px] resize-none glass"
                                 required
                             />
