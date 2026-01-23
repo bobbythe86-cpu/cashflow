@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { Profile } from '@/types'
 
 export async function getProfile() {
     const supabase = createClient()
@@ -21,11 +22,12 @@ export async function getProfile() {
             id: user.id,
             email: user.email,
             full_name: user.user_metadata?.full_name || 'Felhasználó',
+            role: 'user' as const,
             avatar_url: null
         }
     }
 
-    return data
+    return data as Profile
 }
 
 export async function updateProfile(formData: FormData) {
