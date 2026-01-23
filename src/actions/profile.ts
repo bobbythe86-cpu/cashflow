@@ -16,15 +16,19 @@ export async function getProfile() {
         .eq('id', user.id)
         .single()
 
-    if (error) {
-        console.error('Error fetching profile:', error)
+    // console.log('Fetched profile for:', user.email, 'Role:', data?.role)
+
+    // Vészhelyzeti megoldás: Ha az adatbázis RLS hibát dob, 
+    // legalább az Auth adatokból adjunk vissza egy alap profilt
+    if (!data) {
         return {
             id: user.id,
             email: user.email,
             full_name: user.user_metadata?.full_name || 'Felhasználó',
-            role: 'user' as const,
-            avatar_url: null
-        }
+            role: (user.email === 'bobbythe86@gmail.com' ? 'admin' : 'user'), // Cseréld le a saját email címedre!
+            avatar_url: null,
+            updated_at: new Date().toISOString()
+        } as Profile
     }
 
     return data as Profile

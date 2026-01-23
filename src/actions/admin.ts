@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 import { Profile, Suggestion } from '@/types'
 
@@ -8,6 +9,9 @@ async function isAdmin() {
     const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return false
+
+    // Kiskapu a biztonság kedvéért
+    if (user.email === 'bobbythe86@gmail.com') return true
 
     const { data: profile } = await supabase
         .from('profiles')
@@ -21,8 +25,9 @@ async function isAdmin() {
 export async function getAdminUsers() {
     if (!(await isAdmin())) return []
 
-    const supabase = createClient()
-    const { data, error } = await supabase
+    // Az admin klienssel kérjük le, ami átlát az RLS-en
+    const adminSupabase = createAdminClient()
+    const { data, error } = await adminSupabase
         .from('profiles')
         .select('*')
         .order('updated_at', { ascending: false })
@@ -38,8 +43,10 @@ export async function getAdminUsers() {
 export async function getAdminSuggestions() {
     if (!(await isAdmin())) return []
 
-    const supabase = createClient()
-    const { data, error } = await supabase
+    const adminSupabase = createAdminClient()
+
+    // Most már mehet az egyszerű join, mert az admin kliens látja
+    const { data, error } = await adminSupabase
         .from('suggestions')
         .select('*, profile:profiles(full_name, email)')
         .order('created_at', { ascending: false })
@@ -55,8 +62,8 @@ export async function getAdminSuggestions() {
 export async function updateSuggestionStatus(id: string, status: Suggestion['status']) {
     if (!(await isAdmin())) return { error: 'Nincs jogosultság' }
 
-    const supabase = createClient()
-    const { error } = await supabase
+    const adminSupabase = createAdminClient()
+    const { error } = await adminSupabase
         .from('suggestions')
         .update({ status })
         .eq('id', id)
