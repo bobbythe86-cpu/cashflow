@@ -1,0 +1,18 @@
+Zéró tolerancia a nem használt kódra:
+Soha nem maradhat olyan import, amit nem használunk a fájlban.
+Soha nem maradhat olyan változó, ami nincs használatban.
+Megoldás: Mentés előtt mindig ellenőrizni és törölni a szürkével jelölt (unused) sorokat.
+
+Szigorú Típuskezelés (No 'any'):
+Tilos az any típus használata. Minden adatstruktúrához (legyen az API válasz vagy komponens prop) létre kell hozni egy interface-t vagy type-ot.
+A komplexebb típusokat a src/types/index.ts-be kell tenni, az egyszerűbb, csak lokálisan használtakat a fájl tetején kell definiálni.
+
+Komponensek típusai:
+Ha egy komponenst vagy ikont adunk át prop-ként, használjuk a React.ElementType vagy React.FC típusokat az any helyett.
+
+Kényszerített Build-ellenőrzés:
+Mielőtt a fejlesztő (az AI) kijelenti, hogy kész a feladat, köteles lefuttatni a háttérben egy npm run build vagy npx next lint parancsot.
+Csak akkor tekinthető késznek a munka, ha a build sikeresen (Exit code: 0) lezajlott.
+
+Clean Code elv:
+A fájlok módosítása után a feleslegessé vált segédfüggvényeket vagy típusokat azonnal el kell távolítani.

@@ -13,6 +13,7 @@ const menuItems = [
     { name: 'Rendszeresek', icon: Repeat, href: '/recurring' },
     { name: 'Költségvetés', icon: PiggyBank, href: '/budgets' },
     { name: 'Analitika', icon: TrendingUp, href: '/analytics' },
+    { name: 'Jelentések', icon: Receipt, href: '/reports' },
     { name: 'Beállítások', icon: Settings, href: '/settings' },
 ]
 
