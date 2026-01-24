@@ -26,23 +26,30 @@ export function Navbar() {
         : '??'
 
     return (
-        <header className="h-16 border-b bg-background/80 backdrop-blur-md flex items-center justify-between px-8 sticky top-0 z-30">
-            <div className="flex items-center gap-4 w-1/3">
+        <header className="h-16 border-b bg-background/60 backdrop-blur-xl flex items-center justify-between px-4 sm:px-8 sticky top-0 z-30">
+            {/* Mobile Logo */}
+            <div className="lg:hidden">
+                <h1 className="text-xl font-black bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
+                    CF
+                </h1>
+            </div>
+
+            <div className="hidden sm:flex items-center gap-4 w-1/3">
                 <div className="relative w-full max-w-sm">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <Input
-                        placeholder="Keresés a tranzakciók között..."
-                        className="pl-10 bg-secondary/50 border-none focus-visible:ring-1 focus-visible:ring-primary"
+                        placeholder="Keresés..."
+                        className="pl-10 h-9 bg-secondary/30 border-none focus-visible:ring-1 focus-visible:ring-primary rounded-xl"
                     />
                 </div>
             </div>
 
-            <div className="flex items-center gap-4">
-                <Button variant="ghost" size="icon" className="relative">
+            <div className="flex items-center gap-2 sm:gap-4">
+                <Button variant="ghost" size="icon" className="relative h-9 w-9 rounded-xl">
                     <Bell className="w-5 h-5 text-muted-foreground" />
-                    <span className="absolute top-2 right-2 w-2 h-2 bg-destructive rounded-full border-2 border-background" />
+                    <span className="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full border-2 border-background" />
                 </Button>
-                <div className="flex items-center gap-3 pl-4 border-l">
+                <div className="flex items-center gap-3 pl-2 sm:pl-4 border-l">
                     <div className="text-right hidden sm:block">
                         <p className="text-sm font-medium">{profile?.full_name || 'Betöltés...'}</p>
                         <p className="text-xs text-muted-foreground">
