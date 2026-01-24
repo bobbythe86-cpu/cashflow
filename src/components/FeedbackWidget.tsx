@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { usePathname } from 'next/navigation'
 import { MessageSquare, Send, X, Lightbulb, CheckCircle2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
@@ -32,8 +33,12 @@ export function FeedbackWidget() {
         }
     }
 
+    // Don't render on login/register pages
+    const pathname = usePathname()
+    if (['/login', '/register'].includes(pathname)) return null
+
     return (
-        <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
+        <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end print:hidden">
             {/* Chat Window */}
             <div className={cn(
                 "mb-4 w-80 overflow-hidden rounded-2xl border bg-card shadow-2xl transition-all duration-300 ease-in-out glass",
