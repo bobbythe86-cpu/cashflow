@@ -5,6 +5,7 @@ import { OverviewChart } from "@/components/dashboard/OverviewChart"
 import { TransactionList } from "@/components/dashboard/TransactionList"
 import { AddTransactionDialog } from "@/components/dashboard/AddTransactionDialog"
 import { BudgetProgress } from "@/components/dashboard/BudgetProgress"
+import { SavingsSummary } from "@/components/dashboard/SavingsSummary"
 import { cn } from "@/lib/utils"
 
 export default async function DashboardPage() {
@@ -120,6 +121,20 @@ export default async function DashboardPage() {
                         </CardHeader>
                         <CardContent>
                             <BudgetProgress budgets={stats.budgets} monthlyExpensesByCategory={stats.monthlyExpensesByCategory} />
+                        </CardContent>
+                    </Card>
+
+                    <Card className="border-none shadow-sm glass">
+                        <CardHeader>
+                            <div className="flex items-center justify-between">
+                                <CardTitle className="text-sm flex items-center gap-2">
+                                    <PiggyBankIcon className="w-4 h-4 text-primary" />
+                                    Megtakarítási Célok
+                                </CardTitle>
+                            </div>
+                        </CardHeader>
+                        <CardContent>
+                            <SavingsSummary goals={stats.savingsGoals} />
                         </CardContent>
                     </Card>
 

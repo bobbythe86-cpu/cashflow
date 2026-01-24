@@ -58,6 +58,19 @@ export interface Transaction {
     wallet?: Wallet;
 }
 
+export interface SavingsGoal {
+    id: string;
+    user_id: string;
+    name: string;
+    target_amount: number;
+    current_amount: number;
+    deadline: string | null;
+    color: string;
+    icon: string;
+    created_at: string;
+    updated_at: string;
+}
+
 export type RecurringFrequency = 'daily' | 'weekly' | 'monthly' | 'yearly';
 
 export interface RecurringTransaction {
@@ -86,5 +99,6 @@ export interface DashboardStats {
     wallets: Wallet[];
     budgets: Budget[];
     monthlyExpensesByCategory: Record<string, number>;
+    savingsGoals: SavingsGoal[];
 }
 export * from './suggestions';

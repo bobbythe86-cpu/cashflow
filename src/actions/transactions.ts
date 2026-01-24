@@ -2,7 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
-import { TransactionType, Transaction, Wallet, Budget } from '@/types'
+import { TransactionType, Transaction, Wallet, Budget, SavingsGoal } from '@/types'
 import { syncRecurringTransactions } from './recurring'
 
 const isConfigured = () =>
@@ -32,6 +32,7 @@ export async function getDashboardStats() {
     let transactions: Transaction[] = []
     let wallets: Wallet[] = []
     let budgets: Budget[] = []
+    let savingsGoals: SavingsGoal[] = []
     let totalWalletBalance = 0
     const now = new Date()
 
@@ -40,15 +41,17 @@ export async function getDashboardStats() {
         const { data: { user } } = await supabase.auth.getUser()
 
         if (user) {
-            const [transRes, walletRes, budgetRes] = await Promise.all([
+            const [transRes, walletRes, budgetRes, savingsRes] = await Promise.all([
                 supabase.from('transactions').select('*, category:categories(*)').eq('user_id', user.id).order('date', { ascending: false }),
                 supabase.from('wallets').select('*').eq('user_id', user.id),
-                supabase.from('budgets').select('*, category:categories(*)').eq('user_id', user.id).eq('month', now.getMonth() + 1).eq('year', now.getFullYear())
+                supabase.from('budgets').select('*, category:categories(*)').eq('user_id', user.id).eq('month', now.getMonth() + 1).eq('year', now.getFullYear()),
+                supabase.from('savings_goals').select('*').eq('user_id', user.id).limit(3)
             ])
 
             const rawTransactions = transRes.data || []
             wallets = (walletRes.data as Wallet[]) || []
             budgets = (budgetRes.data as Budget[]) || []
+            savingsGoals = (savingsRes.data as SavingsGoal[]) || []
             transactions = rawTransactions.map(t => ({ ...t, wallet: wallets.find(w => w.id === t.wallet_id) || null }))
             totalWalletBalance = wallets.reduce((acc, w) => acc + w.balance, 0)
         }
@@ -92,7 +95,8 @@ export async function getDashboardStats() {
         chartData: transactions.map(t => ({ date: t.date, amount: t.amount, type: t.type })),
         wallets,
         budgets,
-        monthlyExpensesByCategory
+        monthlyExpensesByCategory,
+        savingsGoals
     }
 }
 
