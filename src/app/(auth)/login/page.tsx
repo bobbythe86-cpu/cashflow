@@ -43,8 +43,8 @@ export default function LoginPage() {
     }
 
     return (
-        <div className="min-h-screen w-full flex items-center justify-center bg-secondary/30 p-4">
-            <Card className="w-full max-w-md border-none shadow-2xl bg-background/80 backdrop-blur-xl animate-in fade-in zoom-in duration-300">
+        <div className="min-h-screen w-full flex items-center justify-center bg-secondary/30 p-4 relative">
+            <Card className="w-full max-w-md border-none shadow-2xl bg-background/80 backdrop-blur-xl animate-in fade-in zoom-in duration-300 relative z-10">
                 <CardHeader className="space-y-1 text-center">
                     <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent mb-2">
                         CashFlow
@@ -116,7 +116,7 @@ export default function LoginPage() {
                 </CardFooter>
             </Card>
 
-            <div className="fixed bottom-4 right-4 max-w-xs p-4 bg-primary/10 border border-primary/20 rounded-xl backdrop-blur-md text-xs animate-in slide-in-from-bottom-5 duration-500">
+            <div className="absolute bottom-4 left-4 right-4 sm:fixed sm:bottom-4 sm:right-4 sm:left-auto sm:max-w-xs p-4 bg-primary/10 border border-primary/20 rounded-xl backdrop-blur-md text-xs animate-in slide-in-from-bottom-5 duration-500 z-0">
                 <p className="font-bold mb-1">Tesztelési tipp:</p>
                 <p>E-mail: <code className="bg-background/50 px-1 rounded">demo@cashflow.hu</code></p>
                 <p>Jelszó: <code className="bg-background/50 px-1 rounded">demo123</code></p>
