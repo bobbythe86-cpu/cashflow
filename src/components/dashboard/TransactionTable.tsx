@@ -140,6 +140,7 @@ export function TransactionTable({ transactions }: TransactionTableProps) {
                         <TableRow>
                             <TableHead>Dátum</TableHead>
                             <TableHead>Leírás</TableHead>
+                            <TableHead>Pénztárca</TableHead>
                             <TableHead>Kategória</TableHead>
                             <TableHead className="text-right">Összeg</TableHead>
                             <TableHead className="w-[50px]"></TableHead>
@@ -160,6 +161,11 @@ export function TransactionTable({ transactions }: TransactionTableProps) {
                                             }
                                             {t.description || "Nincs leírás"}
                                         </div>
+                                    </TableCell>
+                                    <TableCell>
+                                        <span className="text-xs text-muted-foreground font-medium">
+                                            {t.wallet?.name || "Nincs tárca"}
+                                        </span>
                                     </TableCell>
                                     <TableCell>
                                         <span className="px-2 py-1 rounded-full bg-primary/10 text-primary text-[10px] font-medium uppercase tracking-wider">
@@ -186,7 +192,7 @@ export function TransactionTable({ transactions }: TransactionTableProps) {
                             ))
                         ) : (
                             <TableRow>
-                                <TableCell colSpan={5} className="py-10 text-center text-muted-foreground">
+                                <TableCell colSpan={6} className="py-10 text-center text-muted-foreground">
                                     Nem található a szűrésnek megfelelő tranzakció.
                                 </TableCell>
                             </TableRow>

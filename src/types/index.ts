@@ -19,16 +19,43 @@ export interface Category {
     created_at: string;
 }
 
+export interface Budget {
+    id: string;
+    user_id: string;
+    category_id: string;
+    amount: number;
+    month: number;
+    year: number;
+    created_at: string;
+    category?: Category;
+}
+
+export type WalletType = 'bank' | 'cash' | 'savings' | 'credit';
+
+export interface Wallet {
+    id: string;
+    user_id: string;
+    name: string;
+    type: WalletType;
+    balance: number;
+    currency: string;
+    color: string | null;
+    created_at: string;
+}
+
 export interface Transaction {
     id: string;
     user_id: string;
     category_id: string | null;
+    wallet_id: string | null;
+    to_wallet_id?: string | null;
     amount: number;
     description: string | null;
     date: string;
     type: TransactionType;
     created_at: string;
     category?: Category;
+    wallet?: Wallet;
 }
 
 export type RecurringFrequency = 'daily' | 'weekly' | 'monthly' | 'yearly';
@@ -56,5 +83,8 @@ export interface DashboardStats {
     expenseGrowth: number;
     recentTransactions: Transaction[];
     chartData: { date: string; amount: number; type: TransactionType }[];
+    wallets: Wallet[];
+    budgets: Budget[];
+    monthlyExpensesByCategory: Record<string, number>;
 }
 export * from './suggestions';

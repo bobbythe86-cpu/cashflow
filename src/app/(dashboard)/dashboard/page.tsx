@@ -1,9 +1,10 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { getDashboardStats } from "@/actions/transactions"
-import { ArrowUpRight, ArrowDownRight, Wallet, History, PiggyBank as PiggyBankIcon } from 'lucide-react'
+import { ArrowUpRight, ArrowDownRight, Wallet, History, PiggyBank as PiggyBankIcon, Landmark, Target } from 'lucide-react'
 import { OverviewChart } from "@/components/dashboard/OverviewChart"
 import { TransactionList } from "@/components/dashboard/TransactionList"
 import { AddTransactionDialog } from "@/components/dashboard/AddTransactionDialog"
+import { BudgetProgress } from "@/components/dashboard/BudgetProgress"
 import { cn } from "@/lib/utils"
 
 export default async function DashboardPage() {
@@ -22,14 +23,30 @@ export default async function DashboardPage() {
             </div>
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <Card className="card-hover border-none shadow-sm glass">
+                <Card className="card-hover border-none shadow-sm glass overflow-hidden">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium">Teljes egyenleg</CardTitle>
                         <Wallet className="h-4 w-4 text-primary" />
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold">{stats.totalBalance.toLocaleString()} Ft</div>
-                        <p className="text-xs text-muted-foreground">+2.1% az előző hónaphoz képest</p>
+                        <div className="mt-4 space-y-2">
+                            {stats.wallets.map((wallet) => (
+                                <div key={wallet.id} className="flex items-center justify-between text-[11px] border-t border-white/5 pt-2 first:border-0 first:pt-0">
+                                    <span className="text-muted-foreground flex items-center gap-1">
+                                        <div className={cn(
+                                            "w-1.5 h-1.5 rounded-full",
+                                            wallet.type === 'bank' ? "bg-blue-500" :
+                                                wallet.type === 'cash' ? "bg-green-500" : "bg-orange-500"
+                                        )} />
+                                        {wallet.name}
+                                    </span>
+                                    <span className="font-semibold text-foreground/80">
+                                        {new Intl.NumberFormat('hu-HU', { maximumFractionDigits: 0 }).format(wallet.balance)} Ft
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
                     </CardContent>
                 </Card>
 
@@ -91,17 +108,35 @@ export default async function DashboardPage() {
                     </CardContent>
                 </Card>
 
-                <Card className="lg:col-span-3 border-none shadow-sm glass">
-                    <CardHeader>
-                        <div className="flex items-center justify-between">
-                            <CardTitle>Legutóbbi tranzakciók</CardTitle>
-                            <History className="h-4 w-4 text-muted-foreground" />
-                        </div>
-                    </CardHeader>
-                    <CardContent>
-                        <TransactionList transactions={stats.recentTransactions} />
-                    </CardContent>
-                </Card>
+                <div className="lg:col-span-3 space-y-4">
+                    <Card className="border-none shadow-sm glass">
+                        <CardHeader>
+                            <div className="flex items-center justify-between">
+                                <CardTitle className="text-sm flex items-center gap-2">
+                                    <Target className="w-4 h-4 text-primary" />
+                                    Havi Költségvetés
+                                </CardTitle>
+                            </div>
+                        </CardHeader>
+                        <CardContent>
+                            <BudgetProgress budgets={stats.budgets} monthlyExpensesByCategory={stats.monthlyExpensesByCategory} />
+                        </CardContent>
+                    </Card>
+
+                    <Card className="border-none shadow-sm glass">
+                        <CardHeader>
+                            <div className="flex items-center justify-between">
+                                <CardTitle className="text-sm flex items-center gap-2">
+                                    <History className="w-4 h-4 text-primary" />
+                                    Legutóbbi tranzakciók
+                                </CardTitle>
+                            </div>
+                        </CardHeader>
+                        <CardContent>
+                            <TransactionList transactions={stats.recentTransactions} />
+                        </CardContent>
+                    </Card>
+                </div>
             </div>
         </div>
     )

@@ -24,19 +24,25 @@ import {
 } from "@/components/ui/select"
 import { createTransaction } from '@/actions/transactions'
 import { getCategories } from '@/actions/categories'
-import { Category } from '@/types'
+import { getWallets } from '@/actions/wallets'
+import { Category, Wallet } from '@/types'
 
 export function AddTransactionDialog() {
     const [open, setOpen] = useState(false)
     const [categories, setCategories] = useState<Category[]>([])
+    const [wallets, setWallets] = useState<Wallet[]>([])
     const [type, setType] = useState<'income' | 'expense'>('expense')
 
     useEffect(() => {
-        async function fetchCategories() {
-            const data = await getCategories()
-            setCategories(data as Category[])
+        async function fetchData() {
+            const [cats, walls] = await Promise.all([
+                getCategories(),
+                getWallets()
+            ])
+            setCategories(cats as Category[])
+            setWallets(walls as Wallet[])
         }
-        fetchCategories()
+        fetchData()
     }, [])
 
     async function handleSubmit(formData: FormData) {
@@ -104,6 +110,22 @@ export function AddTransactionDialog() {
                                     {filteredCategories.map((cat) => (
                                         <SelectItem key={cat.id} value={cat.id}>
                                             {cat.name}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        <div className="grid gap-2">
+                            <Label htmlFor="wallet_id">Pénztárca</Label>
+                            <Select name="wallet_id" defaultValue={wallets[0]?.id}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Válassz pénztárcát" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {wallets.map((wallet) => (
+                                        <SelectItem key={wallet.id} value={wallet.id}>
+                                            {wallet.name} ({new Intl.NumberFormat('hu-HU', { style: 'currency', currency: wallet.currency }).format(wallet.balance)})
                                         </SelectItem>
                                     ))}
                                 </SelectContent>

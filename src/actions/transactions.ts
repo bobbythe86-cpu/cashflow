@@ -2,10 +2,9 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
-import { TransactionType, Transaction } from '@/types'
+import { TransactionType, Transaction, Wallet, Budget } from '@/types'
 import { syncRecurringTransactions } from './recurring'
 
-// Segédfüggvény a konfiguráció ellenőrzéséhez
 const isConfigured = () =>
     process.env.NEXT_PUBLIC_SUPABASE_URL &&
     !process.env.NEXT_PUBLIC_SUPABASE_URL.includes('your-project')
@@ -20,96 +19,68 @@ const MOCK_TRANSACTIONS = [
 
 export async function getTransactions() {
     if (!isConfigured()) return MOCK_TRANSACTIONS
-
     const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
-
     if (!user) return []
-
-    const { data, error } = await supabase
-        .from('transactions')
-        .select('*, category:categories(*)')
-        .eq('user_id', user.id)
-        .order('date', { ascending: false })
-
-    if (error || !data) {
-        console.error('Error fetching transactions:', error)
-        return []
-    }
-
-    return data
+    const { data: transactions } = await supabase.from('transactions').select('*, category:categories(*)').eq('user_id', user.id).order('date', { ascending: false })
+    const { data: wallets } = await supabase.from('wallets').select('*').eq('user_id', user.id)
+    return (transactions || []).map(t => ({ ...t, wallet: wallets?.find(w => w.id === t.wallet_id) || null }))
 }
 
 export async function getDashboardStats() {
     await syncRecurringTransactions()
     let transactions: Transaction[] = []
+    let wallets: Wallet[] = []
+    let budgets: Budget[] = []
+    let totalWalletBalance = 0
+    const now = new Date()
 
     if (isConfigured()) {
         const supabase = createClient()
         const { data: { user } } = await supabase.auth.getUser()
 
         if (user) {
-            const { data } = await supabase
-                .from('transactions')
-                .select('*, category:categories(*)')
-                .eq('user_id', user.id)
-                .order('date', { ascending: false })
-            transactions = data || []
+            const [transRes, walletRes, budgetRes] = await Promise.all([
+                supabase.from('transactions').select('*, category:categories(*)').eq('user_id', user.id).order('date', { ascending: false }),
+                supabase.from('wallets').select('*').eq('user_id', user.id),
+                supabase.from('budgets').select('*, category:categories(*)').eq('user_id', user.id).eq('month', now.getMonth() + 1).eq('year', now.getFullYear())
+            ])
+
+            const rawTransactions = transRes.data || []
+            wallets = (walletRes.data as Wallet[]) || []
+            budgets = (budgetRes.data as Budget[]) || []
+            transactions = rawTransactions.map(t => ({ ...t, wallet: wallets.find(w => w.id === t.wallet_id) || null }))
+            totalWalletBalance = wallets.reduce((acc, w) => acc + w.balance, 0)
         }
     } else {
         transactions = MOCK_TRANSACTIONS
     }
 
-    // Filter for current month's stats
-    const now = new Date()
     const startOfCurrentMonth = new Date(now.getFullYear(), now.getMonth(), 1)
-
     const currentMonthTransactions = transactions.filter(t => new Date(t.date) >= startOfCurrentMonth)
+
+    const monthlyExpensesByCategory = currentMonthTransactions
+        .filter(t => t.type === 'expense')
+        .reduce((acc, t) => {
+            if (t.category_id) acc[t.category_id] = (acc[t.category_id] || 0) + t.amount
+            return acc
+        }, {} as Record<string, number>)
 
     const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1)
     const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0)
-
     const lastMonthTransactions = transactions.filter(t => {
         const d = new Date(t.date)
         return d >= startOfLastMonth && d <= endOfLastMonth
     })
 
-    const monthlyIncome = currentMonthTransactions
-        .filter(t => t.type === 'income')
-        .reduce((acc, t) => acc + t.amount, 0)
+    const monthlyIncome = currentMonthTransactions.filter(t => t.type === 'income').reduce((acc, t) => acc + t.amount, 0)
+    const monthlyExpenses = currentMonthTransactions.filter(t => t.type === 'expense').reduce((acc, t) => acc + t.amount, 0)
+    const lastMonthlyIncome = lastMonthTransactions.filter(t => t.type === 'income').reduce((acc, t) => acc + t.amount, 0)
+    const lastMonthlyExpenses = lastMonthTransactions.filter(t => t.type === 'expense').reduce((acc, t) => acc + t.amount, 0)
 
-    const monthlyExpenses = currentMonthTransactions
-        .filter(t => t.type === 'expense')
-        .reduce((acc, t) => acc + t.amount, 0)
-
-    const lastMonthlyIncome = lastMonthTransactions
-        .filter(t => t.type === 'income')
-        .reduce((acc, t) => acc + t.amount, 0)
-
-    const lastMonthlyExpenses = lastMonthTransactions
-        .filter(t => t.type === 'expense')
-        .reduce((acc, t) => acc + t.amount, 0)
-
-    // Total balance remains aggregate of all transactions
-    const totalIncome = transactions
-        .filter(t => t.type === 'income')
-        .reduce((acc, t) => acc + t.amount, 0)
-
-    const totalExpenses = transactions
-        .filter(t => t.type === 'expense')
-        .reduce((acc, t) => acc + t.amount, 0)
-
-    const totalBalance = totalIncome - totalExpenses
-
-    // Calculate growth percentage
+    const totalBalance = isConfigured() ? totalWalletBalance : (monthlyIncome - monthlyExpenses)
     const incomeGrowth = lastMonthlyIncome === 0 ? 0 : ((monthlyIncome - lastMonthlyIncome) / lastMonthlyIncome) * 100
     const expenseGrowth = lastMonthlyExpenses === 0 ? 0 : ((monthlyExpenses - lastMonthlyExpenses) / lastMonthlyExpenses) * 100
-
-    const chartData = transactions.map(t => ({
-        date: t.date,
-        amount: t.amount,
-        type: t.type
-    }))
 
     return {
         totalBalance,
@@ -118,56 +89,33 @@ export async function getDashboardStats() {
         incomeGrowth,
         expenseGrowth,
         recentTransactions: transactions.slice(0, 5),
-        chartData
+        chartData: transactions.map(t => ({ date: t.date, amount: t.amount, type: t.type })),
+        wallets,
+        budgets,
+        monthlyExpensesByCategory
     }
 }
 
 export async function createTransaction(formData: FormData) {
-    if (!isConfigured()) {
-        console.log('Demo mód: Tranzakció mentése szimulálva')
-        revalidatePath('/dashboard')
-        revalidatePath('/transactions')
-        return { success: true }
-    }
-
+    if (!isConfigured()) return { success: true }
     const supabase = createClient()
     const amount = parseFloat(formData.get('amount') as string)
     const description = formData.get('description') as string
     const date = formData.get('date') as string
     const type = formData.get('type') as TransactionType
     const category_id = formData.get('category_id') as string
-
+    const wallet_id = formData.get('wallet_id') as string
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return { error: 'Bejelentkezés szükséges' }
-
-    const { error } = await supabase.from('transactions').insert({
-        user_id: user.id,
-        amount,
-        description,
-        date,
-        type,
-        category_id: category_id || null,
-    })
-
+    const { error } = await supabase.from('transactions').insert({ user_id: user.id, amount, description, date, type, category_id: category_id || null, wallet_id: wallet_id || null })
     if (error) return { error: error.message }
-
-    revalidatePath('/dashboard')
-    revalidatePath('/transactions')
-    return { success: true }
+    revalidatePath('/dashboard'); revalidatePath('/transactions'); return { success: true }
 }
 
 export async function deleteTransaction(id: string) {
-    if (!isConfigured()) {
-        console.log('Demo mód: Törlés szimulálva')
-        return { success: true }
-    }
-
+    if (!isConfigured()) return { success: true }
     const supabase = createClient()
     const { error } = await supabase.from('transactions').delete().eq('id', id)
-
     if (error) return { error: error.message }
-
-    revalidatePath('/dashboard')
-    revalidatePath('/transactions')
-    return { success: true }
+    revalidatePath('/dashboard'); revalidatePath('/transactions'); return { success: true }
 }

@@ -1,16 +1,27 @@
 import { getCategories } from "@/actions/categories"
 import { getProfile } from "@/actions/profile"
+import { getWallets } from "@/actions/wallets"
+import { getBudgets } from "@/actions/budgets"
 import { CategoryList } from "@/components/dashboard/CategoryList"
 import { AddCategoryDialog } from "@/components/dashboard/AddCategoryDialog"
 import { ProfileForm } from "@/components/dashboard/ProfileForm"
+import { WalletList } from "@/components/dashboard/WalletList"
+import { AddWalletDialog } from "@/components/dashboard/AddWalletDialog"
+import { BudgetList } from "@/components/dashboard/BudgetList"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 export default async function SettingsPage() {
-    const [categories, profile] = await Promise.all([
+    const [categories, profile, wallets, budgets] = await Promise.all([
         getCategories(),
-        getProfile()
+        getProfile(),
+        getWallets(),
+        getBudgets()
     ])
+
+    const now = new Date()
+    const month = now.getMonth() + 1
+    const year = now.getFullYear()
 
     return (
         <div className="space-y-8 animate-in fade-in duration-500">
@@ -22,6 +33,8 @@ export default async function SettingsPage() {
             <Tabs defaultValue="categories" className="space-y-4">
                 <TabsList className="glass">
                     <TabsTrigger value="categories">Kategóriák</TabsTrigger>
+                    <TabsTrigger value="wallets">Pénztárcák</TabsTrigger>
+                    <TabsTrigger value="budgets">Költségvetés</TabsTrigger>
                     <TabsTrigger value="profile">Profil</TabsTrigger>
                 </TabsList>
 
@@ -55,6 +68,32 @@ export default async function SettingsPage() {
                             </CardContent>
                         </Card>
                     </div>
+                </TabsContent>
+
+                <TabsContent value="wallets" className="space-y-4">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <h3 className="text-lg font-medium">Kezeld a pénztárcáidat</h3>
+                            <p className="text-sm text-muted-foreground">Adhatsz hozzá bankszámlákat, hitelkártyákat vagy készpénzt.</p>
+                        </div>
+                        <AddWalletDialog />
+                    </div>
+
+                    <WalletList wallets={wallets} />
+                </TabsContent>
+
+                <TabsContent value="budgets" className="space-y-4">
+                    <div>
+                        <h3 className="text-lg font-medium">Havi keretek beállítása</h3>
+                        <p className="text-sm text-muted-foreground">Állítsd be, mennyit tervezel költeni az egyes kategóriákban ebben a hónapban.</p>
+                    </div>
+
+                    <BudgetList
+                        categories={categories.filter(c => c.type === 'expense')}
+                        budgets={budgets}
+                        month={month}
+                        year={year}
+                    />
                 </TabsContent>
 
                 <TabsContent value="profile">
