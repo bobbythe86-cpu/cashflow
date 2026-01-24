@@ -4,8 +4,16 @@ import { createClient } from '@/lib/supabase/server'
 import { getDashboardStats } from './transactions'
 import { getBudgets } from './budgets'
 import { getRecurringTransactions } from './recurring'
-import { addMonths, format, startOfMonth } from 'date-fns'
+import { addMonths, format } from 'date-fns'
 import { hu } from 'date-fns/locale'
+
+export interface ForecastData {
+    monthName: string;
+    label: string;
+    income: number;
+    expenses: number;
+    balance: number;
+}
 
 export async function getCashflowForecast() {
     const supabase = createClient()
@@ -19,7 +27,7 @@ export async function getCashflowForecast() {
 
     // 2. Prepare forecast
     let currentBalance = stats.totalBalance
-    const forecast = []
+    const forecast: ForecastData[] = []
     const now = new Date()
 
     // We forecast for the next 3 months (including the rest of the current one)
@@ -40,10 +48,6 @@ export async function getCashflowForecast() {
         const monthlyRecurringExpenses = recurring
             .filter(r => r.type === 'expense' && r.is_active)
             .reduce((acc, r) => acc + r.amount, 0)
-
-        // For the current month (i=0), we should only consider what's left
-        // But for simplicity in this version, we'll show full months for future
-        // and current balance + expected movements for the current one.
 
         if (i > 0) {
             currentBalance += monthlyRecurringIncome

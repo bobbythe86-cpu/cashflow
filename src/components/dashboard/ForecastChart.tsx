@@ -9,9 +9,10 @@ import {
     XAxis,
     YAxis,
 } from "recharts"
+import { ForecastData } from "@/actions/analytics"
 
 interface ForecastChartProps {
-    data: any[]
+    data: ForecastData[]
 }
 
 export function ForecastChart({ data }: ForecastChartProps) {
@@ -46,26 +47,27 @@ export function ForecastChart({ data }: ForecastChartProps) {
                     <Tooltip
                         content={({ active, payload }) => {
                             if (active && payload && payload.length) {
+                                const p = payload[0].payload as ForecastData
                                 return (
                                     <div className="rounded-lg border bg-background p-3 shadow-xl glass">
-                                        <p className="text-sm font-bold mb-2">{payload[0].payload.label}</p>
+                                        <p className="text-sm font-bold mb-2">{p.label}</p>
                                         <div className="space-y-1">
                                             <div className="flex items-center justify-between gap-4">
                                                 <span className="text-xs text-muted-foreground">Várható egyenleg:</span>
                                                 <span className="text-sm font-black text-primary">
-                                                    {payload[0].value?.toLocaleString()} Ft
+                                                    {p.balance.toLocaleString()} Ft
                                                 </span>
                                             </div>
                                             <div className="flex items-center justify-between gap-4">
                                                 <span className="text-xs text-muted-foreground">Tervezett bevétel:</span>
                                                 <span className="text-xs font-bold text-green-500">
-                                                    +{payload[0].payload.income?.toLocaleString()} Ft
+                                                    +{p.income.toLocaleString()} Ft
                                                 </span>
                                             </div>
                                             <div className="flex items-center justify-between gap-4">
                                                 <span className="text-xs text-muted-foreground">Tervezett kiadás:</span>
                                                 <span className="text-xs font-bold text-red-500">
-                                                    -{payload[0].payload.expenses?.toLocaleString()} Ft
+                                                    -{p.expenses.toLocaleString()} Ft
                                                 </span>
                                             </div>
                                         </div>
