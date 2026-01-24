@@ -1,9 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Sparkles, X, ChevronRight, Zap, Megaphone } from 'lucide-react'
+import { X, ChevronRight, Megaphone } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
 import { getChangelog, UpdateEntry } from '@/actions/changelog'
 import { UpdatesModal } from './UpdatesModal'
 

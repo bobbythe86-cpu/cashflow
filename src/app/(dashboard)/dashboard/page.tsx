@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { getDashboardStats } from "@/actions/transactions"
-import { ArrowUpRight, ArrowDownRight, Wallet, History, PiggyBank as PiggyBankIcon, Landmark, Target } from 'lucide-react'
+import { ArrowUpRight, ArrowDownRight, Wallet, History, PiggyBank as PiggyBankIcon, Target } from 'lucide-react'
 import { OverviewChart } from "@/components/dashboard/OverviewChart"
 import { TransactionList } from "@/components/dashboard/TransactionList"
 import { AddTransactionDialog } from "@/components/dashboard/AddTransactionDialog"

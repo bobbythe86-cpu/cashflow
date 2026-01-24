@@ -11,7 +11,7 @@ interface WalletListProps {
     wallets: Wallet[]
 }
 
-const typeIcons: Record<WalletType, any> = {
+const typeIcons: Record<WalletType, React.ElementType> = {
     bank: Landmark,
     cash: Banknote,
     savings: PiggyBank,
