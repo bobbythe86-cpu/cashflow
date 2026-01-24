@@ -1,17 +1,51 @@
 import { getTransactions } from "@/actions/transactions"
+import { getCashflowForecast } from "@/actions/analytics"
 import { CategoryPieChart } from "@/components/dashboard/CategoryPieChart"
 import { MonthlyComparison } from "@/components/dashboard/MonthlyComparison"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { ForecastChart } from "@/components/dashboard/ForecastChart"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { TrendingUp, Info } from "lucide-react"
 
 export default async function AnalyticsPage() {
-    const transactions = await getTransactions()
+    const [transactions, forecast] = await Promise.all([
+        getTransactions(),
+        getCashflowForecast()
+    ])
 
     return (
         <div className="space-y-8 animate-in fade-in duration-500">
             <div>
                 <h2 className="text-3xl font-bold tracking-tight">Analitika</h2>
-                <p className="text-muted-foreground">Mélyebb betekintés a pénzügyi szokásaidba.</p>
+                <p className="text-muted-foreground">Mélyebb betekintés a pénzügyi szokásaidba és jövőbeli várakozások.</p>
             </div>
+
+            <Card className="border-none shadow-lg glass bg-primary/5">
+                <CardHeader>
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <CardTitle className="text-xl flex items-center gap-2">
+                                <TrendingUp className="w-5 h-5 text-primary" />
+                                3 Hónapos Cash Flow Előrejelzés
+                            </CardTitle>
+                            <CardDescription>
+                                A rendszeres tranzakcióid és a beállított költségvetésed alapján.
+                            </CardDescription>
+                        </div>
+                    </div>
+                </CardHeader>
+                <CardContent>
+                    <ForecastChart data={forecast} />
+                    <div className="mt-6 p-4 rounded-xl bg-blue-500/10 border border-blue-500/20 flex gap-3">
+                        <Info className="w-5 h-5 text-blue-500 shrink-0" />
+                        <p className="text-xs text-blue-700 dark:text-blue-300 leading-relaxed">
+                            <strong>Hogyan számolunk?</strong> Az előrejelzés figyelembe veszi az aktuális egyenlegedet,
+                            a rendszersesen ismétlődő bevételeidet, valamint a kiadásoknál a
+                            <strong>magasabb értéket</strong> választja a beállított költségvetésed és a rendszeres kiadásaid közül,
+                            hogy a lehető legbiztonságosabb becslést adja.
+                        </p>
+                    </div>
+                </CardContent>
+            </Card>
 
             <div className="grid gap-6 md:grid-cols-2">
                 <Card className="border-none shadow-sm glass">
