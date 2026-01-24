@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { TransactionType, Transaction, Wallet, Budget, SavingsGoal } from '@/types'
 import { syncRecurringTransactions } from './recurring'
+import { generateInsights } from './advisor'
 
 const isConfigured = () =>
     process.env.NEXT_PUBLIC_SUPABASE_URL &&
@@ -85,6 +86,13 @@ export async function getDashboardStats() {
     const incomeGrowth = lastMonthlyIncome === 0 ? 0 : ((monthlyIncome - lastMonthlyIncome) / lastMonthlyIncome) * 100
     const expenseGrowth = lastMonthlyExpenses === 0 ? 0 : ((monthlyExpenses - lastMonthlyExpenses) / lastMonthlyExpenses) * 100
 
+    const insights = await generateInsights(
+        transactions,
+        budgets,
+        savingsGoals,
+        monthlyExpensesByCategory
+    )
+
     return {
         totalBalance,
         monthlyIncome,
@@ -96,7 +104,8 @@ export async function getDashboardStats() {
         wallets,
         budgets,
         monthlyExpensesByCategory,
-        savingsGoals
+        savingsGoals,
+        insights
     }
 }
 

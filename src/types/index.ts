@@ -100,5 +100,15 @@ export interface DashboardStats {
     budgets: Budget[];
     monthlyExpensesByCategory: Record<string, number>;
     savingsGoals: SavingsGoal[];
+    insights: Insight[];
+}
+
+export interface Insight {
+    id: string;
+    title: string;
+    description: string;
+    type: 'info' | 'warning' | 'success' | 'trend';
+    priority: 'low' | 'medium' | 'high';
+    category_id?: string;
 }
 export * from './suggestions';

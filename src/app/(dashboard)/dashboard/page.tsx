@@ -6,6 +6,7 @@ import { TransactionList } from "@/components/dashboard/TransactionList"
 import { AddTransactionDialog } from "@/components/dashboard/AddTransactionDialog"
 import { BudgetProgress } from "@/components/dashboard/BudgetProgress"
 import { SavingsSummary } from "@/components/dashboard/SavingsSummary"
+import { AIInsightCard } from "@/components/dashboard/AIInsightCard"
 import { cn } from "@/lib/utils"
 
 export default async function DashboardPage() {
@@ -110,6 +111,8 @@ export default async function DashboardPage() {
                 </Card>
 
                 <div className="lg:col-span-3 space-y-4">
+                    <AIInsightCard insights={stats.insights} />
+
                     <Card className="border-none shadow-sm glass">
                         <CardHeader>
                             <div className="flex items-center justify-between">
