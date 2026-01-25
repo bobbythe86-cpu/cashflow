@@ -67,6 +67,7 @@ export interface SavingsGoal {
     deadline: string | null;
     color: string;
     icon: string;
+    image_url?: string | null;
     created_at: string;
     updated_at: string;
 }

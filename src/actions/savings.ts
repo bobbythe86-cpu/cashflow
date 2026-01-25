@@ -38,9 +38,29 @@ export async function createSavingsGoal(formData: FormData) {
     const current_amount = parseFloat(formData.get('current_amount') as string) || 0
     const deadline = formData.get('deadline') as string
     const color = formData.get('color') as string
+    const image = formData.get('image') as File | null
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return { error: 'Bejelentkezés szükséges' }
+
+    let image_url = null
+
+    if (image && image.size > 0) {
+        const fileExt = image.name.split('.').pop()
+        const fileName = `${user.id}/${Date.now()}.${fileExt}`
+        const { error: uploadError } = await supabase.storage
+            .from('savings')
+            .upload(fileName, image)
+
+        if (uploadError) {
+            console.error('Image upload failed:', uploadError)
+        } else {
+            const { data: publicUrlData } = supabase.storage
+                .from('savings')
+                .getPublicUrl(fileName)
+            image_url = publicUrlData.publicUrl
+        }
+    }
 
     const { error } = await supabase.from('savings_goals').insert({
         user_id: user.id,
@@ -48,7 +68,8 @@ export async function createSavingsGoal(formData: FormData) {
         target_amount,
         current_amount,
         deadline: deadline || null,
-        color: color || 'hsl(var(--primary))'
+        color: color || 'hsl(var(--primary))',
+        image_url
     })
 
     if (error) return { error: error.message }

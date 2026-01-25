@@ -96,6 +96,16 @@ export function AddSavingsGoalDialog() {
                                 className="w-full h-10 rounded-xl cursor-pointer bg-transparent"
                             />
                         </div>
+                        <div className="grid gap-2">
+                            <Label htmlFor="image">Borítókép (opcionális)</Label>
+                            <Input
+                                id="image"
+                                name="image"
+                                type="file"
+                                accept="image/*"
+                                className="rounded-xl cursor-pointer file:bg-primary/10 file:text-primary file:border-0 file:rounded-lg file:mr-4 file:px-2 file:py-1 file:text-xs file:font-bold"
+                            />
+                        </div>
                     </div>
                     <DialogFooter>
                         <Button type="submit" disabled={loading} className="w-full rounded-xl">
