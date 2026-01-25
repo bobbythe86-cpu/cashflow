@@ -107,9 +107,8 @@ export async function updateSavingsAmount(id: string, newAmount: number, walletI
 
     if (walletError || !wallet) return { error: 'Pénztárca nem található' }
 
-    // 3. Update wallet balance (Inverse logic: Adding to savings means removing from wallet)
-    // If diff is positive (adding 5000 to savings), we subtract 5000 from wallet
-    // If diff is negative (removing 5000 from savings), we add 5000 to wallet
+    // 3. Check wallet balance
+    // If diff is positive (adding 5000 to savings), we check if wallet has enough
     const newWalletBalance = wallet.balance - diff
 
     // Check if wallet has enough funds when adding to savings
@@ -117,12 +116,8 @@ export async function updateSavingsAmount(id: string, newAmount: number, walletI
         return { error: 'Nincs elég fedezet a kiválasztott pénztárcában!' }
     }
 
-    const { error: updateWalletError } = await supabase
-        .from('wallets')
-        .update({ balance: newWalletBalance })
-        .eq('id', walletId)
-
-    if (updateWalletError) return { error: 'Nem sikerült frissíteni a pénztárca egyenlegét' }
+    // We do NOT manually update wallet balance here, because inserting the transaction (Step 5)
+    // will trigger the automatic balance update via database triggers.
 
     // 4. Update savings goal
     const { error: updateGoalError } = await supabase
