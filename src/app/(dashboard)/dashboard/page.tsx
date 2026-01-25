@@ -24,6 +24,17 @@ export default async function DashboardPage() {
                 <AddTransactionDialog />
             </div>
 
+            {/* Savings Goals Section - Prominent */}
+            {stats.savingsGoals.length > 0 && (
+                <div className="space-y-4">
+                    <h3 className="text-lg font-semibold flex items-center gap-2">
+                        <PiggyBankIcon className="w-5 h-5 text-primary" />
+                        Megtakarítási Célok
+                    </h3>
+                    <SavingsSummary goals={stats.savingsGoals} />
+                </div>
+            )}
+
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                 <Card className="card-hover border-none shadow-sm glass overflow-hidden">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -127,19 +138,6 @@ export default async function DashboardPage() {
                         </CardContent>
                     </Card>
 
-                    <Card className="border-none shadow-sm glass">
-                        <CardHeader>
-                            <div className="flex items-center justify-between">
-                                <CardTitle className="text-sm flex items-center gap-2">
-                                    <PiggyBankIcon className="w-4 h-4 text-primary" />
-                                    Megtakarítási Célok
-                                </CardTitle>
-                            </div>
-                        </CardHeader>
-                        <CardContent>
-                            <SavingsSummary goals={stats.savingsGoals} />
-                        </CardContent>
-                    </Card>
 
                     <Card className="border-none shadow-sm glass">
                         <CardHeader>
