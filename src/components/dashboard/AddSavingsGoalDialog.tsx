@@ -43,7 +43,7 @@ export function AddSavingsGoalDialog() {
                     <Plus className="w-4 h-4" /> Új cél kitűzése
                 </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px] glass border-white/10">
+            <DialogContent className="sm:max-w-[425px] bg-background border-border/50 shadow-2xl">
                 <form onSubmit={handleSubmit}>
                     <DialogHeader>
                         <DialogTitle>Új megtakarítási cél</DialogTitle>

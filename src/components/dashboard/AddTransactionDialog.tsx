@@ -62,7 +62,7 @@ export function AddTransactionDialog() {
                     Új tranzakció
                 </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent className="sm:max-w-[425px] bg-background border-border/50 shadow-2xl">
                 <form action={handleSubmit}>
                     <DialogHeader>
                         <DialogTitle>Új Tranzakció</DialogTitle>

@@ -57,7 +57,7 @@ export function AddWalletDialog() {
                     <Plus className="w-4 h-4" /> Új tárca
                 </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent className="sm:max-w-[425px] bg-background border-border/50 shadow-2xl">
                 <form onSubmit={handleSubmit}>
                     <DialogHeader>
                         <DialogTitle>Új pénztárca hozzáadása</DialogTitle>
