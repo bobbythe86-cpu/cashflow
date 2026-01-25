@@ -38,7 +38,7 @@ export function FeedbackWidget() {
     if (['/login', '/register'].includes(pathname)) return null
 
     return (
-        <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end print:hidden">
+        <div className="fixed bottom-24 lg:bottom-6 right-6 z-50 flex flex-col items-end print:hidden">
             {/* Chat Window */}
             <div className={cn(
                 "mb-4 w-80 overflow-hidden rounded-2xl border bg-card shadow-2xl transition-all duration-300 ease-in-out glass",
