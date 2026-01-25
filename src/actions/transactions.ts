@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { TransactionType, Transaction, Wallet, Budget, SavingsGoal } from '@/types'
 import { syncRecurringTransactions } from './recurring'
+import { syncRecurringSavings } from './savings'
 import { generateInsights } from './advisor'
 
 const isConfigured = () =>
@@ -30,6 +31,7 @@ export async function getTransactions() {
 
 export async function getDashboardStats() {
     await syncRecurringTransactions()
+    await syncRecurringSavings()
     let transactions: Transaction[] = []
     let wallets: Wallet[] = []
     let budgets: Budget[] = []
