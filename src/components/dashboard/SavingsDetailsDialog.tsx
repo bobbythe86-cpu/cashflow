@@ -1,7 +1,8 @@
 'use client'
 
-import { useState } from 'react'
-import { SavingsGoal } from '@/types'
+import { useState, useEffect } from 'react'
+import { SavingsGoal, Wallet } from '@/types'
+import { getWallets } from '@/actions/wallets'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -13,6 +14,13 @@ import {
     DialogTitle,
     DialogTrigger,
 } from '@/components/ui/dialog'
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
 import { updateSavingsAmount, deleteSavingsGoal } from '@/actions/savings'
 import { Target, Trash2, Plus, Minus, Calendar } from 'lucide-react'
@@ -25,21 +33,38 @@ interface SavingsDetailsDialogProps {
 }
 
 export function SavingsDetailsDialog({ goal, children }: SavingsDetailsDialogProps) {
-    const [open, setOpen] = useState(false)
-    const [amount, setAmount] = useState('')
-    const [loading, setLoading] = useState(false)
+    const [wallets, setWallets] = useState<Wallet[]>([])
+    const [selectedWallet, setSelectedWallet] = useState<string>('')
+
+    useEffect(() => {
+        getWallets().then(data => {
+            if (data) {
+                setWallets(data)
+                // Default to first 'bank' or 'cash' wallet
+                const defaultWallet = data.find(w => w.type === 'bank') || data[0]
+                if (defaultWallet) setSelectedWallet(defaultWallet.id)
+            }
+        })
+    }, [])
 
     async function handleUpdate(action: 'add' | 'remove') {
         const val = parseInt(amount)
         if (!val || val <= 0) return
+        if (!selectedWallet) return alert('Kérlek válassz egy pénztárcát!')
 
         setLoading(true)
         const next = action === 'add'
             ? goal.current_amount + val
             : Math.max(0, goal.current_amount - val)
 
-        await updateSavingsAmount(goal.id, next)
-        setAmount('')
+        const result = await updateSavingsAmount(goal.id, next, selectedWallet)
+
+        if (result.error) {
+            alert(result.error)
+        } else {
+            setAmount('')
+            setOpen(false)
+        }
         setLoading(false)
     }
 
@@ -103,6 +128,23 @@ export function SavingsDetailsDialog({ goal, children }: SavingsDetailsDialogPro
                     {/* Quick Actions */}
                     <div className="grid gap-4 p-4 bg-secondary/30 rounded-xl border border-border/50">
                         <Label>Egyenleg módosítása</Label>
+
+                        <div className="space-y-2">
+                            <Label className="text-xs text-muted-foreground">Forrás / Cél Pénztárca</Label>
+                            <Select value={selectedWallet} onValueChange={setSelectedWallet}>
+                                <SelectTrigger className="bg-background">
+                                    <SelectValue placeholder="Válassz tárcát" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {wallets.map(w => (
+                                        <SelectItem key={w.id} value={w.id}>
+                                            {w.name} ({new Intl.NumberFormat('hu-HU', { maximumFractionDigits: 0 }).format(w.balance)} Ft)
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+
                         <div className="flex gap-2">
                             <Input
                                 type="number"
@@ -116,14 +158,14 @@ export function SavingsDetailsDialog({ goal, children }: SavingsDetailsDialogPro
                             <Button
                                 variant="outline"
                                 onClick={() => handleUpdate('remove')}
-                                disabled={loading || !amount}
+                                disabled={loading || !amount || !selectedWallet}
                                 className="hover:bg-red-500/10 hover:text-red-500 hover:border-red-500/50"
                             >
                                 <Minus className="w-4 h-4 mr-2" /> Kivét
                             </Button>
                             <Button
                                 onClick={() => handleUpdate('add')}
-                                disabled={loading || !amount}
+                                disabled={loading || !amount || !selectedWallet}
                                 className="bg-primary hover:bg-primary/90"
                             >
                                 <Plus className="w-4 h-4 mr-2" /> Befizet

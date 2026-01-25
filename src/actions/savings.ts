@@ -79,19 +79,75 @@ export async function createSavingsGoal(formData: FormData) {
     return { success: true }
 }
 
-export async function updateSavingsAmount(id: string, newAmount: number) {
+export async function updateSavingsAmount(id: string, newAmount: number, walletId: string) {
     if (!isConfigured()) return { success: true }
 
     const supabase = createClient()
-    const { error } = await supabase
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { error: 'Bejelentkezés szükséges' }
+
+    // 1. Get current goal state
+    const { data: goal, error: fetchError } = await supabase
+        .from('savings_goals')
+        .select('*')
+        .eq('id', id)
+        .single()
+
+    if (fetchError || !goal) return { error: 'Cél nem található' }
+
+    const diff = newAmount - goal.current_amount
+    if (diff === 0) return { success: true }
+
+    // 2. Get wallet
+    const { data: wallet, error: walletError } = await supabase
+        .from('wallets')
+        .select('*')
+        .eq('id', walletId)
+        .single()
+
+    if (walletError || !wallet) return { error: 'Pénztárca nem található' }
+
+    // 3. Update wallet balance (Inverse logic: Adding to savings means removing from wallet)
+    // If diff is positive (adding 5000 to savings), we subtract 5000 from wallet
+    // If diff is negative (removing 5000 from savings), we add 5000 to wallet
+    const newWalletBalance = wallet.balance - diff
+
+    // Check if wallet has enough funds when adding to savings
+    if (diff > 0 && newWalletBalance < 0) {
+        return { error: 'Nincs elég fedezet a kiválasztott pénztárcában!' }
+    }
+
+    const { error: updateWalletError } = await supabase
+        .from('wallets')
+        .update({ balance: newWalletBalance })
+        .eq('id', walletId)
+
+    if (updateWalletError) return { error: 'Nem sikerült frissíteni a pénztárca egyenlegét' }
+
+    // 4. Update savings goal
+    const { error: updateGoalError } = await supabase
         .from('savings_goals')
         .update({ current_amount: newAmount })
         .eq('id', id)
 
-    if (error) return { error: error.message }
+    if (updateGoalError) return { error: updateGoalError.message }
+
+    // 5. Create transaction record for history
+    await supabase.from('transactions').insert({
+        user_id: user.id,
+        amount: Math.abs(diff),
+        type: diff > 0 ? 'expense' : 'income', // Expense from wallet pov when saving, Income to wallet when withdrawing
+        description: diff > 0
+            ? `Megtakarítás: ${goal.name}`
+            : `Kivét megtakarításból: ${goal.name}`,
+        wallet_id: walletId,
+        date: new Date().toISOString().split('T')[0],
+        category_id: null // Special system movement
+    })
 
     revalidatePath('/savings')
     revalidatePath('/dashboard')
+    revalidatePath('/transactions')
     return { success: true }
 }
 
