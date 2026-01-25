@@ -1,4 +1,4 @@
-'use client'
+// I will switch file to SavingsDetailsDialog.tsx to fix the error.
 
 import { useState } from 'react'
 import { SavingsGoal } from '@/types'

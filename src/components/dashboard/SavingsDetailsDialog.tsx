@@ -35,6 +35,9 @@ interface SavingsDetailsDialogProps {
 export function SavingsDetailsDialog({ goal, children }: SavingsDetailsDialogProps) {
     const [wallets, setWallets] = useState<Wallet[]>([])
     const [selectedWallet, setSelectedWallet] = useState<string>('')
+    const [open, setOpen] = useState(false)
+    const [amount, setAmount] = useState('')
+    const [loading, setLoading] = useState(false)
 
     useEffect(() => {
         getWallets().then(data => {
