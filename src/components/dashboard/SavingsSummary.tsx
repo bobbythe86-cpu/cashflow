@@ -1,7 +1,7 @@
 'use client'
 
 import { SavingsGoal } from "@/types"
-import { Target, ChevronRight } from "lucide-react"
+import { Target } from "lucide-react"
 import Link from "next/link"
 
 interface SavingsSummaryProps {
@@ -32,6 +32,7 @@ export function SavingsSummary({ goals }: SavingsSummaryProps) {
                     <div key={goal.id} className="relative overflow-hidden rounded-2xl border shadow-lg group h-40 flex flex-col justify-end transition-all hover:scale-[1.02]">
                         {goal.image_url ? (
                             <div className="absolute inset-0 z-0">
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
                                 <img src={goal.image_url} alt="" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                                 <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
                             </div>

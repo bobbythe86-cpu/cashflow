@@ -41,6 +41,7 @@ export function SavingsGoalList({ goals }: SavingsGoalListProps) {
                         {/* Background Image / Overlay */}
                         {goal.image_url && (
                             <div className="absolute inset-0 z-0">
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
                                 <img src={goal.image_url} alt={goal.name} className="w-full h-full object-cover opacity-20 group-hover:opacity-30 transition-opacity duration-500" />
                                 <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-transparent" />
                             </div>
