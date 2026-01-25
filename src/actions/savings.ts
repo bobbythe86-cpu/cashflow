@@ -158,3 +158,53 @@ export async function deleteSavingsGoal(id: string) {
     revalidatePath('/dashboard')
     return { success: true }
 }
+
+export async function updateRecurringSettings(
+    goalId: string,
+    enabled: boolean,
+    frequency?: 'daily' | 'weekly' | 'monthly',
+    amount?: number,
+    walletId?: string
+) {
+    if (!isConfigured()) return { success: true }
+
+    const supabase = createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { error: 'Bejelentkezés szükséges' }
+
+    // Calculate next recurring date based on frequency
+    let nextDate = null
+    if (enabled && frequency) {
+        const now = new Date()
+        switch (frequency) {
+            case 'daily':
+                now.setDate(now.getDate() + 1)
+                break
+            case 'weekly':
+                now.setDate(now.getDate() + 7)
+                break
+            case 'monthly':
+                now.setMonth(now.getMonth() + 1)
+                break
+        }
+        nextDate = now.toISOString().split('T')[0]
+    }
+
+    const { error } = await supabase
+        .from('savings_goals')
+        .update({
+            recurring_enabled: enabled,
+            recurring_frequency: enabled ? frequency : null,
+            recurring_amount: enabled ? amount : null,
+            recurring_wallet_id: enabled ? walletId : null,
+            next_recurring_date: nextDate
+        })
+        .eq('id', goalId)
+        .eq('user_id', user.id)
+
+    if (error) return { error: error.message }
+
+    revalidatePath('/savings')
+    revalidatePath('/dashboard')
+    return { success: true }
+}

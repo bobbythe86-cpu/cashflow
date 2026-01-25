@@ -68,6 +68,11 @@ export interface SavingsGoal {
     color: string;
     icon: string;
     image_url?: string | null;
+    recurring_enabled?: boolean;
+    recurring_frequency?: 'daily' | 'weekly' | 'monthly';
+    recurring_amount?: number;
+    recurring_wallet_id?: string | null;
+    next_recurring_date?: string | null;
     created_at: string;
     updated_at: string;
 }

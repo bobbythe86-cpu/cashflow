@@ -22,8 +22,8 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
-import { updateSavingsAmount, deleteSavingsGoal } from '@/actions/savings'
-import { Target, Trash2, Plus, Minus, Calendar } from 'lucide-react'
+import { updateSavingsAmount, deleteSavingsGoal, updateRecurringSettings } from '@/actions/savings'
+import { Target, Trash2, Plus, Minus, Calendar, Repeat } from 'lucide-react'
 import { format } from 'date-fns'
 import { hu } from 'date-fns/locale'
 
@@ -38,6 +38,12 @@ export function SavingsDetailsDialog({ goal, children }: SavingsDetailsDialogPro
     const [open, setOpen] = useState(false)
     const [amount, setAmount] = useState('')
     const [loading, setLoading] = useState(false)
+
+    // Recurring payment state
+    const [recurringEnabled, setRecurringEnabled] = useState(goal.recurring_enabled || false)
+    const [recurringFrequency, setRecurringFrequency] = useState<'daily' | 'weekly' | 'monthly'>(goal.recurring_frequency || 'monthly')
+    const [recurringAmount, setRecurringAmount] = useState(goal.recurring_amount?.toString() || '')
+    const [recurringWallet, setRecurringWallet] = useState(goal.recurring_wallet_id || '')
 
     useEffect(() => {
         getWallets().then(data => {
@@ -77,6 +83,33 @@ export function SavingsDetailsDialog({ goal, children }: SavingsDetailsDialogPro
             await deleteSavingsGoal(goal.id)
             setOpen(false)
         }
+    }
+
+    async function handleSaveRecurring() {
+        if (recurringEnabled && (!recurringAmount || parseFloat(recurringAmount) <= 0)) {
+            alert('Kérlek adj meg egy érvényes összeget!')
+            return
+        }
+        if (recurringEnabled && !recurringWallet) {
+            alert('Kérlek válassz egy pénztárcát!')
+            return
+        }
+
+        setLoading(true)
+        const result = await updateRecurringSettings(
+            goal.id,
+            recurringEnabled,
+            recurringFrequency,
+            recurringEnabled ? parseFloat(recurringAmount) : undefined,
+            recurringEnabled ? recurringWallet : undefined
+        )
+
+        if (result.error) {
+            alert(result.error)
+        } else {
+            alert('Rendszeres befizetés beállítva!')
+        }
+        setLoading(false)
     }
 
     const percent = Math.min(Math.round((goal.current_amount / goal.target_amount) * 100), 100)
@@ -174,6 +207,80 @@ export function SavingsDetailsDialog({ goal, children }: SavingsDetailsDialogPro
                                 <Plus className="w-4 h-4 mr-2" /> Befizet
                             </Button>
                         </div>
+                    </div>
+
+                    {/* Recurring Payment Settings */}
+                    <div className="grid gap-4 p-4 bg-secondary/30 rounded-xl border border-border/50">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                                <Repeat className="w-4 h-4 text-primary" />
+                                <Label className="font-semibold">Rendszeres befizetés</Label>
+                            </div>
+                            <label className="relative inline-flex items-center cursor-pointer">
+                                <input
+                                    type="checkbox"
+                                    checked={recurringEnabled}
+                                    onChange={(e) => setRecurringEnabled(e.target.checked)}
+                                    className="sr-only peer"
+                                />
+                                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
+                            </label>
+                        </div>
+
+                        {recurringEnabled && (
+                            <div className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
+                                <div className="space-y-2">
+                                    <Label className="text-xs text-muted-foreground">Gyakoriság</Label>
+                                    <Select value={recurringFrequency} onValueChange={(v) => setRecurringFrequency(v as 'daily' | 'weekly' | 'monthly')}>
+                                        <SelectTrigger className="bg-background">
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="daily">Naponta</SelectItem>
+                                            <SelectItem value="weekly">Hetente</SelectItem>
+                                            <SelectItem value="monthly">Havonta</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label className="text-xs text-muted-foreground">Összeg</Label>
+                                    <Input
+                                        type="number"
+                                        placeholder="pl. 10000"
+                                        value={recurringAmount}
+                                        onChange={(e) => setRecurringAmount(e.target.value)}
+                                        className="bg-background"
+                                    />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label className="text-xs text-muted-foreground">Forrás pénztárca</Label>
+                                    <Select value={recurringWallet} onValueChange={setRecurringWallet}>
+                                        <SelectTrigger className="bg-background">
+                                            <SelectValue placeholder="Válassz tárcát" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {wallets.map(w => (
+                                                <SelectItem key={w.id} value={w.id}>
+                                                    {w.name} ({new Intl.NumberFormat('hu-HU', { maximumFractionDigits: 0 }).format(w.balance)} Ft)
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                <Button
+                                    onClick={handleSaveRecurring}
+                                    disabled={loading}
+                                    className="w-full"
+                                    variant="outline"
+                                >
+                                    <Repeat className="w-4 h-4 mr-2" />
+                                    Beállítások mentése
+                                </Button>
+                            </div>
+                        )}
                     </div>
                 </div>
 
