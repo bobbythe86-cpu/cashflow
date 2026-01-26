@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Receipt, PiggyBank, Settings, LogOut, TrendingUp, Repeat, ShieldCheck, Target } from 'lucide-react'
+import { LayoutDashboard, Receipt, PiggyBank, Settings, LogOut, TrendingUp, Repeat, ShieldCheck, Target, Trophy } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { logout } from '@/actions/auth'
@@ -13,6 +13,7 @@ const menuItems = [
     { name: 'Rendszeresek', icon: Repeat, href: '/recurring' },
     { name: 'Költségvetés', icon: PiggyBank, href: '/budgets' },
     { name: 'Megtakarítások', icon: Target, href: '/savings' },
+    { name: 'Mérföldkövek', icon: Trophy, href: '/milestones' },
     { name: 'Analitika', icon: TrendingUp, href: '/analytics' },
     { name: 'Jelentések', icon: Receipt, href: '/reports' },
     { name: 'Beállítások', icon: Settings, href: '/settings' },

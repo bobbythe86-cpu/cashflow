@@ -2,13 +2,14 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Receipt, PiggyBank, Target, TrendingUp } from 'lucide-react'
+import { LayoutDashboard, Receipt, PiggyBank, Target, TrendingUp, Trophy } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const navItems = [
     { name: 'Főoldal', icon: LayoutDashboard, href: '/dashboard' },
     { name: 'Napló', icon: Receipt, href: '/transactions' },
     { name: 'Célok', icon: Target, href: '/savings' },
+    { name: 'Trófeák', icon: Trophy, href: '/milestones' },
     { name: 'Keretek', icon: PiggyBank, href: '/budgets' },
     { name: 'Analitika', icon: TrendingUp, href: '/analytics' },
 ]
