@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { TransactionType } from '@/types'
+import { updateMilestoneProgress } from './milestones'
 
 const isConfigured = () =>
     process.env.NEXT_PUBLIC_SUPABASE_URL &&
@@ -54,6 +55,8 @@ export async function createCategory(formData: FormData) {
     })
 
     if (error) return { error: error.message }
+
+    await updateMilestoneProgress(user.id, 'budget_master')
 
     revalidatePath('/dashboard')
     return { success: true }

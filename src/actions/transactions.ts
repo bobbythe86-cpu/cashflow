@@ -4,8 +4,8 @@ import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { TransactionType, Transaction, Wallet, Budget, SavingsGoal } from '@/types'
 import { syncRecurringTransactions } from './recurring'
-import { syncRecurringSavings } from './savings'
 import { generateInsights } from './advisor'
+import { updateMilestoneProgress } from './milestones'
 
 const isConfigured = () =>
     process.env.NEXT_PUBLIC_SUPABASE_URL &&
@@ -31,7 +31,6 @@ export async function getTransactions() {
 
 export async function getDashboardStats() {
     await syncRecurringTransactions()
-    await syncRecurringSavings()
     let transactions: Transaction[] = []
     let wallets: Wallet[] = []
     let budgets: Budget[] = []
@@ -124,6 +123,10 @@ export async function createTransaction(formData: FormData) {
     if (!user) return { error: 'Bejelentkezés szükséges' }
     const { error } = await supabase.from('transactions').insert({ user_id: user.id, amount, description, date, type, category_id: category_id || null, wallet_id: wallet_id || null })
     if (error) return { error: error.message }
+
+    // Check milestones
+    await updateMilestoneProgress(user.id, 'first_transaction')
+
     revalidatePath('/dashboard'); revalidatePath('/transactions'); return { success: true }
 }
 

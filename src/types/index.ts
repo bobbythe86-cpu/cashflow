@@ -117,4 +117,34 @@ export interface Insight {
     priority: 'low' | 'medium' | 'high';
     category_id?: string;
 }
+
+export interface Milestone {
+    id: string;
+    code: string;
+    name: string;
+    description: string;
+    icon: string;
+    target_value: number;
+    category: 'budget' | 'savings' | 'transaction' | 'general';
+    created_at: string;
+}
+
+export interface UserMilestone {
+    id: string;
+    user_id: string;
+    milestone_id: string;
+    current_value: number;
+    is_achieved: boolean;
+    achieved_at: string | null;
+    created_at: string;
+    updated_at: string;
+    milestone?: Milestone;
+}
+
+export type MilestoneWithProgress = Milestone & {
+    progress: number;
+    is_achieved: boolean;
+    achieved_at: string | null;
+}
+
 export * from './suggestions';

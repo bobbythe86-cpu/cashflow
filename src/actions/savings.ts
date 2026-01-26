@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { SavingsGoal } from '@/types'
+import { updateMilestoneProgress } from './milestones'
 
 const isConfigured = () =>
     process.env.NEXT_PUBLIC_SUPABASE_URL &&
@@ -27,89 +28,6 @@ export async function getSavingsGoals() {
     }
 
     return data as SavingsGoal[]
-}
-
-export async function syncRecurringSavings() {
-    if (!isConfigured()) return
-
-    const supabase = createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
-
-    // Get all active recurring savings goals
-    const { data: goals, error } = await supabase
-        .from('savings_goals')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('recurring_enabled', true)
-        .not('next_recurring_date', 'is', null)
-
-    if (error || !goals) return
-
-    const today = new Date().toISOString().split('T')[0]
-
-    for (const goal of goals) {
-        // Check if payment is due (next_recurring_date <= today)
-        if (goal.next_recurring_date && goal.next_recurring_date <= today) {
-            // Get wallet to check balance
-            const { data: wallet } = await supabase
-                .from('wallets')
-                .select('balance')
-                .eq('id', goal.recurring_wallet_id)
-                .single()
-
-            // Skip if wallet doesn't have enough balance
-            if (!wallet || wallet.balance < goal.recurring_amount) {
-                console.log(`Skipping recurring payment for ${goal.name}: insufficient balance`)
-                continue
-            }
-
-            // Update savings goal amount
-            const newAmount = goal.current_amount + goal.recurring_amount
-            await supabase
-                .from('savings_goals')
-                .update({ current_amount: newAmount })
-                .eq('id', goal.id)
-
-            // Create transaction record (trigger will update wallet balance)
-            await supabase.from('transactions').insert({
-                user_id: user.id,
-                amount: goal.recurring_amount,
-                type: 'expense',
-                description: `Rendszeres megtakarítás: ${goal.name}`,
-                wallet_id: goal.recurring_wallet_id,
-                date: today,
-                category_id: null
-            })
-
-            // Calculate next recurring date
-            const currentDate = new Date(goal.next_recurring_date)
-            let nextDate: Date
-
-            switch (goal.recurring_frequency) {
-                case 'daily':
-                    nextDate = new Date(currentDate.setDate(currentDate.getDate() + 1))
-                    break
-                case 'weekly':
-                    nextDate = new Date(currentDate.setDate(currentDate.getDate() + 7))
-                    break
-                case 'monthly':
-                    nextDate = new Date(currentDate.setMonth(currentDate.getMonth() + 1))
-                    break
-                default:
-                    nextDate = new Date(currentDate.setMonth(currentDate.getMonth() + 1))
-            }
-
-            // Update next recurring date
-            await supabase
-                .from('savings_goals')
-                .update({ next_recurring_date: nextDate.toISOString().split('T')[0] })
-                .eq('id', goal.id)
-        }
-    }
-
-    revalidatePath('/dashboard')
-    revalidatePath('/savings')
 }
 
 export async function createSavingsGoal(formData: FormData) {
@@ -156,6 +74,8 @@ export async function createSavingsGoal(formData: FormData) {
     })
 
     if (error) return { error: error.message }
+
+    await updateMilestoneProgress(user.id, 'saving_starter')
 
     revalidatePath('/savings')
     revalidatePath('/dashboard')
@@ -222,6 +142,11 @@ export async function updateSavingsAmount(id: string, newAmount: number, walletI
         date: new Date().toISOString().split('T')[0],
         category_id: null // Special system movement
     })
+
+    // Check if goal reached target
+    if (goal.current_amount < goal.target_amount && newAmount >= goal.target_amount) {
+        await updateMilestoneProgress(user.id, 'consistent_saver')
+    }
 
     revalidatePath('/savings')
     revalidatePath('/dashboard')
