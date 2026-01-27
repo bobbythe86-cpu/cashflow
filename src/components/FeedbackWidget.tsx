@@ -38,10 +38,10 @@ export function FeedbackWidget() {
     if (['/login', '/register'].includes(pathname)) return null
 
     return (
-        <div className="fixed bottom-24 lg:bottom-6 right-6 z-50 flex flex-col items-end print:hidden">
+        <div className="fixed bottom-24 lg:bottom-6 right-6 z-50 flex flex-col items-end print:hidden pointer-events-none">
             {/* Chat Window */}
             <div className={cn(
-                "mb-4 w-80 overflow-hidden rounded-2xl border bg-card shadow-2xl transition-all duration-300 ease-in-out glass",
+                "mb-4 w-80 overflow-hidden rounded-2xl border bg-card shadow-2xl transition-all duration-300 ease-in-out glass pointer-events-auto",
                 isOpen ? "translate-y-0 opacity-100 scale-100" : "translate-y-10 opacity-0 scale-95 pointer-events-none"
             )}>
                 <div className="bg-primary p-4 text-primary-foreground flex items-center justify-between">
@@ -99,7 +99,7 @@ export function FeedbackWidget() {
                 onClick={() => setIsOpen(!isOpen)}
                 size="icon"
                 className={cn(
-                    "h-14 w-14 rounded-full shadow-lg transition-all duration-300 hover:scale-110 active:scale-95",
+                    "h-14 w-14 rounded-full shadow-lg transition-all duration-300 hover:scale-110 active:scale-95 pointer-events-auto",
                     isOpen ? "bg-destructive hover:bg-destructive/90 rotate-90" : "bg-primary hover:bg-primary/90"
                 )}
             >
