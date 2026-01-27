@@ -14,7 +14,8 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { format } from "date-fns"
 import { hu } from "date-fns/locale"
-import { Users, MessageSquare, ShieldCheck, Mail, Clock } from "lucide-react"
+import { Users, MessageSquare, ShieldCheck, Mail, Clock, ShieldAlert } from "lucide-react"
+import { AdminDangerZone } from "@/components/admin/AdminDangerZone"
 
 // Simple Badge component mapping
 function StatusBadge({ status }: { status: string }) {
@@ -67,6 +68,10 @@ export default async function AdminPage() {
                     <TabsTrigger value="users" className="gap-2">
                         <Users className="w-4 h-4" />
                         Felhasználók ({users.length})
+                    </TabsTrigger>
+                    <TabsTrigger value="system" className="gap-2 text-destructive data-[state=active]:bg-destructive data-[state=active]:text-white">
+                        <ShieldAlert className="w-4 h-4" />
+                        Rendszer
                     </TabsTrigger>
                 </TabsList>
 
@@ -163,6 +168,10 @@ export default async function AdminPage() {
                             </Table>
                         </CardContent>
                     </Card>
+                </TabsContent>
+
+                <TabsContent value="system">
+                    <AdminDangerZone />
                 </TabsContent>
             </Tabs>
         </div>

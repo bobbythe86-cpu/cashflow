@@ -73,3 +73,38 @@ export async function updateSuggestionStatus(id: string, status: Suggestion['sta
     revalidatePath('/admin')
     return { success: true }
 }
+
+export async function resetAccount() {
+    if (!(await isAdmin())) return { error: 'Nincs jogosultság' }
+
+    const supabase = createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { error: 'Bejelentkezés szükséges' }
+
+    // 1. Delete all transactions
+    await supabase.from('transactions').delete().eq('user_id', user.id)
+
+    // 2. Delete all savings goals
+    await supabase.from('savings_goals').delete().eq('user_id', user.id)
+
+    // 3. Delete all recurring transactions
+    await supabase.from('recurring_transactions').delete().eq('user_id', user.id)
+
+    // 4. Reset wallet balances to 0
+    await supabase.from('wallets').update({ balance: 0 }).eq('user_id', user.id)
+
+    // 5. Delete milestones / achievements
+    await supabase.from('milestones').delete().eq('user_id', user.id)
+
+    // 6. Delete suggestions created by this admin (optional, but keep it clean)
+    await supabase.from('suggestions').delete().eq('user_id', user.id)
+
+    revalidatePath('/')
+    revalidatePath('/dashboard')
+    revalidatePath('/savings')
+    revalidatePath('/transactions')
+    revalidatePath('/wallets')
+    revalidatePath('/admin')
+
+    return { success: true }
+}

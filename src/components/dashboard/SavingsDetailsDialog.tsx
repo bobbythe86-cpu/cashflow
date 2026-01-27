@@ -23,9 +23,10 @@ import {
 } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
 import { updateSavingsAmount, deleteSavingsGoal, updateRecurringSettings, completeSavingsGoal, getSavingsGoals, getGoalProjection } from '@/actions/savings'
-import { Target, Trash2, Plus, Minus, Calendar, Repeat, TrendingUp } from 'lucide-react'
+import { Target, Trash2, Plus, Minus, Calendar, Repeat, TrendingUp, Settings } from 'lucide-react'
 import { format } from 'date-fns'
 import { hu } from 'date-fns/locale'
+import { AddSavingsGoalDialog } from './AddSavingsGoalDialog'
 
 interface SavingsDetailsDialogProps {
     goal: SavingsGoal
@@ -167,8 +168,25 @@ export function SavingsDetailsDialog({ goal, children }: SavingsDetailsDialogPro
                                 <Target className="w-8 h-8 text-primary" />
                             )}
                         </div>
-                        <div>
-                            <DialogTitle className="text-xl">{goal.name}</DialogTitle>
+                        <div className="flex-1">
+                            <div className="flex items-center justify-between">
+                                <DialogTitle className="text-xl">{goal.name}</DialogTitle>
+                                <AddSavingsGoalDialog
+                                    initialData={{
+                                        id: goal.id,
+                                        name: goal.name,
+                                        target_amount: goal.target_amount,
+                                        current_amount: goal.current_amount,
+                                        deadline: goal.deadline || undefined,
+                                        color: goal.color || undefined
+                                    }}
+                                    trigger={
+                                        <Button variant="ghost" size="icon" className="w-8 h-8 rounded-full opacity-50 hover:opacity-100 transition-opacity">
+                                            <Settings className="w-4 h-4" />
+                                        </Button>
+                                    }
+                                />
+                            </div>
                             {goal.deadline && (
                                 <DialogDescription className="flex items-center gap-1 mt-1">
                                     <Calendar className="w-3 h-3" />

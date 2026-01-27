@@ -365,3 +365,61 @@ export async function getGoalProjection(goalId: string) {
         totalSaved: goal.current_amount
     }
 }
+
+export async function updateSavingsGoal(id: string, formData: FormData) {
+    if (!isConfigured()) return { success: true }
+
+    const supabase = createClient()
+    const name = formData.get('name') as string
+    const target_amount = parseFloat(formData.get('target_amount') as string)
+    const deadline = formData.get('deadline') as string
+    const color = formData.get('color') as string
+    const image = formData.get('image') as File | null
+
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { error: 'Bejelentkezés szükséges' }
+
+    // Fetch existing goal to check if we need to handle image
+    const { data: existingGoal } = await supabase
+        .from('savings_goals')
+        .select('image_url')
+        .eq('id', id)
+        .single()
+
+    let image_url = existingGoal?.image_url
+
+    if (image && image.size > 0) {
+        const fileExt = image.name.split('.').pop()
+        const fileName = `${user.id}/${Date.now()}.${fileExt}`
+        const { error: uploadError } = await supabase.storage
+            .from('savings')
+            .upload(fileName, image)
+
+        if (uploadError) {
+            console.error('Image upload failed:', uploadError)
+        } else {
+            const { data: publicUrlData } = supabase.storage
+                .from('savings')
+                .getPublicUrl(fileName)
+            image_url = publicUrlData.publicUrl
+        }
+    }
+
+    const { error } = await supabase
+        .from('savings_goals')
+        .update({
+            name,
+            target_amount,
+            deadline: deadline || null,
+            color: color || 'hsl(var(--primary))',
+            image_url
+        })
+        .eq('id', id)
+        .eq('user_id', user.id)
+
+    if (error) return { error: error.message }
+
+    revalidatePath('/savings')
+    revalidatePath('/dashboard')
+    return { success: true }
+}

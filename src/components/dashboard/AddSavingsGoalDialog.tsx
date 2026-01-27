@@ -14,12 +14,16 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { createSavingsGoal } from '@/actions/savings'
+import { createSavingsGoal, updateSavingsGoal } from '@/actions/savings'
 
 interface AddSavingsGoalDialogProps {
     initialData?: {
+        id?: string;
         name: string;
         target_amount: number;
+        current_amount?: number;
+        deadline?: string;
+        color?: string;
     };
     trigger?: React.ReactNode;
     open?: boolean;
@@ -37,7 +41,9 @@ export function AddSavingsGoalDialog({ initialData, trigger, open: controlledOpe
         setLoading(true)
 
         const formData = new FormData(e.currentTarget)
-        const result = await createSavingsGoal(formData)
+        const result = initialData?.id
+            ? await updateSavingsGoal(initialData.id, formData)
+            : await createSavingsGoal(formData)
 
         if (result.success) {
             setOpen(false)
@@ -60,9 +66,9 @@ export function AddSavingsGoalDialog({ initialData, trigger, open: controlledOpe
             <DialogContent className="sm:max-w-[425px] bg-background border-border/50 shadow-2xl">
                 <form onSubmit={handleSubmit}>
                     <DialogHeader>
-                        <DialogTitle>Új megtakarítási cél</DialogTitle>
+                        <DialogTitle>{initialData?.id ? 'Adatok módosítása' : 'Új megtakarítási cél'}</DialogTitle>
                         <DialogDescription>
-                            Mi a következő nagy álmod? Add meg a részleteket!
+                            {initialData?.id ? 'Frissítsd a megtakarításod részleteit.' : 'Mi a következő nagy álmod? Add meg a részleteket!'}
                         </DialogDescription>
                     </DialogHeader>
                     <div className="grid gap-6 py-6">
@@ -90,14 +96,16 @@ export function AddSavingsGoalDialog({ initialData, trigger, open: controlledOpe
                             />
                         </div>
                         <div className="grid gap-2">
-                            <Label htmlFor="current_amount">Jelenlegi megtakarítás (opcionális)</Label>
+                            <Label htmlFor="current_amount">Jelenlegi megtakarítás (Ft)</Label>
                             <Input
                                 id="current_amount"
                                 name="current_amount"
                                 type="number"
-                                defaultValue="0"
-                                className="rounded-xl"
+                                defaultValue={initialData?.current_amount || 0}
+                                disabled={!!initialData?.id}
+                                className="rounded-xl opacity-70"
                             />
+                            {initialData?.id && <p className="text-[10px] text-muted-foreground italic">Módosításhoz használd az egyenlegkezelőt.</p>}
                         </div>
                         <div className="grid gap-2">
                             <Label htmlFor="deadline">Határidő (opcionális)</Label>
@@ -106,6 +114,7 @@ export function AddSavingsGoalDialog({ initialData, trigger, open: controlledOpe
                                 name="deadline"
                                 type="date"
                                 className="rounded-xl"
+                                defaultValue={initialData?.deadline ? initialData.deadline.split('T')[0] : ''}
                             />
                         </div>
                         <div className="grid gap-2">
@@ -114,7 +123,7 @@ export function AddSavingsGoalDialog({ initialData, trigger, open: controlledOpe
                                 id="color"
                                 name="color"
                                 type="color"
-                                defaultValue="#3b82f6"
+                                defaultValue={initialData?.color || "#3b82f6"}
                                 className="w-full h-10 rounded-xl cursor-pointer bg-transparent"
                             />
                         </div>
@@ -131,7 +140,7 @@ export function AddSavingsGoalDialog({ initialData, trigger, open: controlledOpe
                     </div>
                     <DialogFooter>
                         <Button type="submit" disabled={loading} className="w-full rounded-xl">
-                            {loading ? 'Létrehozás...' : 'Cél mentése'}
+                            {loading ? 'Folyamatban...' : 'Mentés'}
                         </Button>
                     </DialogFooter>
                 </form>
