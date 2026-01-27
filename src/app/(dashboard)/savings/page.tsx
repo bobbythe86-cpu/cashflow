@@ -1,6 +1,7 @@
 import { getSavingsGoals } from "@/actions/savings"
 import { SavingsGoalList } from "@/components/dashboard/SavingsGoalList"
 import { AddSavingsGoalDialog } from "@/components/dashboard/AddSavingsGoalDialog"
+import { SavingsCalculators } from "@/components/dashboard/SavingsCalculators"
 import { Target } from "lucide-react"
 
 export default async function SavingsPage() {
@@ -15,6 +16,8 @@ export default async function SavingsPage() {
                 </div>
                 <AddSavingsGoalDialog />
             </div>
+
+            <SavingsCalculators />
 
             {goals.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-24 glass rounded-3xl border-2 border-dashed border-white/10 text-center space-y-4">

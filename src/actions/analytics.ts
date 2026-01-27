@@ -65,3 +65,41 @@ export async function getCashflowForecast() {
 
     return forecast
 }
+
+export async function getFIREData() {
+    const stats = await getDashboardStats()
+    const monthlyExpenses = stats.monthlyExpenses || 1 // Avoid division by zero
+    const monthlyIncome = stats.monthlyIncome
+    const monthlySavings = Math.max(0, monthlyIncome - monthlyExpenses)
+
+    // 4% Rule: FIRE Number = Monthly Expenses * 12 * 25
+    const fireTarget = monthlyExpenses * 12 * 25
+    const currentAssets = stats.totalBalance
+    const progress = Math.min(Math.round((currentAssets / fireTarget) * 100), 100)
+
+    // Years to FIRE: (Target - Current) / (Monthly Savings * 12)
+    const yearlySavings = monthlySavings * 12
+    const yearsRemaining = yearlySavings > 0
+        ? Math.max(0, (fireTarget - currentAssets) / yearlySavings)
+        : Infinity
+
+    return {
+        fireTarget,
+        currentAssets,
+        monthlySavings,
+        progress,
+        yearsRemaining,
+        monthlyExpenses
+    }
+}
+
+export async function getEmergencyFundRecommendation() {
+    const stats = await getDashboardStats()
+    const avgMonthlyExpenses = stats.monthlyExpenses || 0
+
+    return {
+        threeMonths: avgMonthlyExpenses * 3,
+        sixMonths: avgMonthlyExpenses * 6,
+        currentExpenses: avgMonthlyExpenses
+    }
+}

@@ -68,6 +68,8 @@ export interface SavingsGoal {
     target_amount: number;
     current_amount: number;
     deadline: string | null;
+    status: 'active' | 'completed';
+    completed_at?: string | null;
     color: string;
     icon: string;
     image_url?: string | null;

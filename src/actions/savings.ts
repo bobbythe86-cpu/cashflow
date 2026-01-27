@@ -242,3 +242,126 @@ export async function updateRecurringSettings(
     revalidatePath('/dashboard')
     return { success: true }
 }
+
+export async function completeSavingsGoal(
+    id: string,
+    action: 'spent' | 'return' | 'transfer',
+    targetId?: string // walletId or goalId
+) {
+    if (!isConfigured()) return { success: true }
+
+    const supabase = createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { error: 'Bejelentkezés szükséges' }
+
+    // 1. Fetch current goal
+    const { data: goal, error: fetchError } = await supabase
+        .from('savings_goals')
+        .select('*')
+        .eq('id', id)
+        .single()
+
+    if (fetchError || !goal) return { error: 'Cél nem található' }
+
+    // 2. Handle funds based on action
+    if (action === 'return' && targetId) {
+        // Return to wallet
+        await supabase.from('transactions').insert({
+            user_id: user.id,
+            amount: goal.current_amount,
+            type: 'income',
+            description: `Megtakarítás sikeres lezárása (visszatöltés): ${goal.name}`,
+            wallet_id: targetId,
+            date: new Date().toISOString().split('T')[0],
+            category_id: null
+        })
+    } else if (action === 'transfer' && targetId) {
+        // Transfer to another goal
+        const { data: targetGoal, error: targetError } = await supabase
+            .from('savings_goals')
+            .select('*')
+            .eq('id', targetId)
+            .single()
+
+        if (!targetError && targetGoal) {
+            await supabase
+                .from('savings_goals')
+                .update({ current_amount: targetGoal.current_amount + goal.current_amount })
+                .eq('id', targetId)
+        }
+    }
+    // 'spent' action does nothing with funds, they are considered utilized
+
+    // 3. Mark as completed
+    const { error: updateError } = await supabase
+        .from('savings_goals')
+        .update({
+            status: 'completed',
+            completed_at: new Date().toISOString(),
+            current_amount: action === 'spent' ? goal.current_amount : 0 // If spent, keep it for records, if returned/transferred, set to 0
+        })
+        .eq('id', id)
+
+    if (updateError) return { error: updateError.message }
+
+    revalidatePath('/savings')
+    revalidatePath('/dashboard')
+    revalidatePath('/transactions')
+    return { success: true }
+}
+
+export async function getGoalProjection(goalId: string) {
+    if (!isConfigured()) return { daysRemaining: null, totalSaved: 0 }
+
+    const supabase = createClient()
+    const { data: goal, error: fetchError } = await supabase
+        .from('savings_goals')
+        .select('*')
+        .eq('id', goalId)
+        .single()
+
+    if (fetchError || !goal) return { daysRemaining: null, totalSaved: 0 }
+
+    // If already completed or target reached
+    if (goal.status === 'completed' || goal.current_amount >= goal.target_amount) {
+        return { daysRemaining: 0, totalSaved: goal.current_amount }
+    }
+
+    // Fetch transactions for this goal from the last 90 days to see pace
+    // Note: This relies on the description convention we established
+    const ninetyDaysAgo = new Date()
+    ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90)
+
+    const { data: transactions } = await supabase
+        .from('transactions')
+        .select('*')
+        .ilike('description', `%${goal.name}%`)
+        .gte('date', ninetyDaysAgo.toISOString().split('T')[0])
+
+    if (!transactions || transactions.length === 0) {
+        return { daysRemaining: null, totalSaved: goal.current_amount }
+    }
+
+    // Calculate total saved in the last 90 days (accounting for withdraws)
+    let netSavedLast90 = 0
+    transactions.forEach(t => {
+        if (t.type === 'expense' && t.description?.includes('Megtakarítás:')) {
+            netSavedLast90 += t.amount
+        } else if (t.type === 'income' && (t.description?.includes('Kivét megtakarításból:') || t.description?.includes('Megtakarítás visszatöltése:'))) {
+            netSavedLast90 -= t.amount
+        }
+    })
+
+    if (netSavedLast90 <= 0) return { daysRemaining: null, totalSaved: goal.current_amount }
+
+    const dailyRate = netSavedLast90 / 90
+    const remaining = goal.target_amount - goal.current_amount
+    const daysRemaining = Math.max(1, Math.ceil(remaining / dailyRate))
+
+    return {
+        daysRemaining,
+        dailyRate,
+        netSavedLast90,
+        totalSaved: goal.current_amount
+    }
+}

@@ -22,8 +22,8 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
-import { updateSavingsAmount, deleteSavingsGoal, updateRecurringSettings } from '@/actions/savings'
-import { Target, Trash2, Plus, Minus, Calendar, Repeat } from 'lucide-react'
+import { updateSavingsAmount, deleteSavingsGoal, updateRecurringSettings, completeSavingsGoal, getSavingsGoals, getGoalProjection } from '@/actions/savings'
+import { Target, Trash2, Plus, Minus, Calendar, Repeat, TrendingUp } from 'lucide-react'
 import { format } from 'date-fns'
 import { hu } from 'date-fns/locale'
 
@@ -39,7 +39,16 @@ export function SavingsDetailsDialog({ goal, children }: SavingsDetailsDialogPro
     const [amount, setAmount] = useState('')
     const [loading, setLoading] = useState(false)
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+    const [showCompleteOptions, setShowCompleteOptions] = useState(false)
+    const [completionAction, setCompletionAction] = useState<'spent' | 'return' | 'transfer'>('spent')
+    const [targetId, setTargetId] = useState('')
     const [returnBalance, setReturnBalance] = useState(goal.current_amount > 0)
+    const [otherGoals, setOtherGoals] = useState<SavingsGoal[]>([])
+    interface GoalProjection {
+        daysRemaining: number | null;
+        dailyRate?: number;
+    }
+    const [projection, setProjection] = useState<GoalProjection | null>(null)
 
     // Recurring payment state
     const [recurringEnabled, setRecurringEnabled] = useState(goal.recurring_enabled || false)
@@ -51,12 +60,19 @@ export function SavingsDetailsDialog({ goal, children }: SavingsDetailsDialogPro
         getWallets().then(data => {
             if (data) {
                 setWallets(data)
-                // Default to first 'bank' or 'cash' wallet
                 const defaultWallet = data.find(w => w.type === 'bank') || data[0]
                 if (defaultWallet) setSelectedWallet(defaultWallet.id)
             }
         })
-    }, [])
+        getSavingsGoals().then(data => {
+            if (data) {
+                setOtherGoals(data.filter(g => g.id !== goal.id && g.status !== 'completed'))
+            }
+        })
+        getGoalProjection(goal.id).then(data => {
+            setProjection(data as GoalProjection)
+        })
+    }, [goal.id])
 
     async function handleUpdate(action: 'add' | 'remove') {
         const val = parseInt(amount)
@@ -82,6 +98,22 @@ export function SavingsDetailsDialog({ goal, children }: SavingsDetailsDialogPro
     async function handleDelete() {
         setLoading(true)
         const result = await deleteSavingsGoal(goal.id, returnBalance ? selectedWallet : undefined)
+        if (result.error) {
+            alert(result.error)
+        } else {
+            setOpen(false)
+        }
+        setLoading(false)
+    }
+
+    async function handleComplete() {
+        if ((completionAction === 'return' || completionAction === 'transfer') && !targetId) {
+            alert('Kérlek válassz egy célhelyet!')
+            return
+        }
+
+        setLoading(true)
+        const result = await completeSavingsGoal(goal.id, completionAction, targetId)
         if (result.error) {
             alert(result.error)
         } else {
@@ -164,7 +196,97 @@ export function SavingsDetailsDialog({ goal, children }: SavingsDetailsDialogPro
                             <span>{goal.current_amount.toLocaleString()} Ft</span>
                             <span className="text-muted-foreground">{goal.target_amount.toLocaleString()} Ft</span>
                         </div>
+
+                        {/* Projection Message */}
+                        {projection && projection.daysRemaining !== null && projection.daysRemaining > 0 && (
+                            <div className="p-3 bg-primary/5 rounded-xl border border-primary/10 flex items-center gap-2 animate-in fade-in duration-700">
+                                <TrendingUp className="w-4 h-4 text-primary" />
+                                <p className="text-xs text-muted-foreground">
+                                    A jelenlegi ütemben várhatóan <span className="text-primary font-bold">{projection.daysRemaining} nap</span> múlva éred el a célodat.
+                                </p>
+                            </div>
+                        )}
                     </div>
+
+                    {/* Goal Completion Section */}
+                    {goal.current_amount >= goal.target_amount && goal.status !== 'completed' && (
+                        <div className="grid gap-4 p-5 bg-green-500/10 rounded-2xl border border-green-500/20 animate-in zoom-in duration-500">
+                            <div className="text-center space-y-1">
+                                <h4 className="text-lg font-black text-green-500">🎉 Gratulálunk!</h4>
+                                <p className="text-xs text-muted-foreground italic">Elérted a megtűzött célodat!</p>
+                            </div>
+
+                            {!showCompleteOptions ? (
+                                <Button
+                                    className="w-full bg-green-500 hover:bg-green-600 text-white font-bold"
+                                    onClick={() => setShowCompleteOptions(true)}
+                                >
+                                    Cél Lezárása
+                                </Button>
+                            ) : (
+                                <div className="space-y-4 pt-2 border-t border-green-500/10">
+                                    <div className="space-y-2">
+                                        <Label className="text-xs font-bold uppercase tracking-wider opacity-60">Mi történjen az összeggel?</Label>
+                                        <Select value={completionAction} onValueChange={(v) => {
+                                            setCompletionAction(v as 'spent' | 'return' | 'transfer')
+                                            setTargetId('')
+                                        }}>
+                                            <SelectTrigger className="bg-background border-green-500/20">
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="spent">Sikerült elöltenem a célra</SelectItem>
+                                                <SelectItem value="return">Pénzt visszateszem tárcába</SelectItem>
+                                                <SelectItem value="transfer">Áthelyezem egy másik célba</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+
+                                    {completionAction === 'return' && (
+                                        <div className="space-y-2 animate-in slide-in-from-top-2">
+                                            <Label className="text-xs text-muted-foreground">Cél Pénztárca</Label>
+                                            <Select value={targetId} onValueChange={setTargetId}>
+                                                <SelectTrigger className="bg-background border-green-500/20">
+                                                    <SelectValue placeholder="Válassz tárcát" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {wallets.map(w => (
+                                                        <SelectItem key={w.id} value={w.id}>{w.name}</SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                    )}
+
+                                    {completionAction === 'transfer' && (
+                                        <div className="space-y-2 animate-in slide-in-from-top-2">
+                                            <Label className="text-xs text-muted-foreground">Másik Megtakarítás</Label>
+                                            <Select value={targetId} onValueChange={setTargetId}>
+                                                <SelectTrigger className="bg-background border-green-500/20">
+                                                    <SelectValue placeholder="Válassz célt" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {otherGoals.map(g => (
+                                                        <SelectItem key={g.id} value={g.id}>{g.name}</SelectItem>
+                                                    ))}
+                                                    {otherGoals.length === 0 && (
+                                                        <div className="p-2 text-xs text-muted-foreground text-center">Nincs más aktív cél</div>
+                                                    )}
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                    )}
+
+                                    <div className="flex gap-2">
+                                        <Button variant="ghost" size="sm" className="flex-1" onClick={() => setShowCompleteOptions(false)}>Mégse</Button>
+                                        <Button className="flex-2 bg-green-500 hover:bg-green-600 text-white" disabled={loading} onClick={handleComplete}>
+                                            {loading ? 'Folyamatban...' : 'Megerősítés'}
+                                        </Button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
 
                     {/* Quick Actions */}
                     <div className="grid gap-4 p-4 bg-secondary/30 rounded-xl border border-border/50">
