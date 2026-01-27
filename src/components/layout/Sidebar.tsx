@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Receipt, PiggyBank, Settings, LogOut, TrendingUp, Repeat, ShieldCheck, Target, Trophy } from 'lucide-react'
+import { LayoutDashboard, Receipt, PiggyBank, Settings, LogOut, TrendingUp, Repeat, ShieldCheck, Target, Trophy, Layers } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { logout } from '@/actions/auth'
@@ -10,6 +10,7 @@ import { logout } from '@/actions/auth'
 const menuItems = [
     { name: 'Irányítópult', icon: LayoutDashboard, href: '/dashboard' },
     { name: 'Tranzakciók', icon: Receipt, href: '/transactions' },
+    { name: 'Kategóriák', icon: Layers, href: '/categories' },
     { name: 'Rendszeresek', icon: Repeat, href: '/recurring' },
     { name: 'Költségvetés', icon: PiggyBank, href: '/budgets' },
     { name: 'Megtakarítások', icon: Target, href: '/savings' },

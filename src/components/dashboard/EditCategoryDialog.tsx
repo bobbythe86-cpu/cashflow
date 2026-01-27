@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Plus } from 'lucide-react'
+import { Pencil } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
     Dialog,
@@ -14,56 +14,54 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import { createCategory } from '@/actions/categories'
+import { updateCategory } from '@/actions/categories'
 import { IconPicker } from './IconPicker'
+import { Category } from '@/types'
 
-export function AddCategoryDialog() {
+interface EditCategoryDialogProps {
+    category: Category
+}
+
+export function EditCategoryDialog({ category }: EditCategoryDialogProps) {
     const [open, setOpen] = useState(false)
-    const [selectedIcon, setSelectedIcon] = useState('Tag')
+    const [selectedIcon, setSelectedIcon] = useState(category.icon || 'Tag')
 
     async function handleSubmit(formData: FormData) {
         formData.append('icon', selectedIcon)
-        const result = await createCategory(formData)
+        const result = await updateCategory(category.id, formData)
         if (result.success) {
             setOpen(false)
-            setSelectedIcon('Tag')
+        } else if (result.error) {
+            alert('Hiba: ' + result.error)
         }
     }
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button className="gap-2">
-                    <Plus className="w-4 h-4" />
-                    Új kategória
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    className="opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8"
+                >
+                    <Pencil className="w-4 h-4" />
                 </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[500px]">
                 <form action={handleSubmit}>
                     <DialogHeader>
-                        <DialogTitle>Új Kategória</DialogTitle>
+                        <DialogTitle>Kategória szerkesztése</DialogTitle>
                         <DialogDescription>
-                            Adj hozzá egy új egyedi kategóriát a pénzügyeidhez.
+                            Módosítsd a kategória nevét, ikonját és színét.
                         </DialogDescription>
                     </DialogHeader>
                     <div className="grid gap-6 py-4">
-                        <RadioGroup defaultValue="expense" name="type" className="flex gap-4">
-                            <div className="flex items-center space-x-2">
-                                <RadioGroupItem value="expense" id="cat-expense" />
-                                <Label htmlFor="cat-expense" className="text-red-500 font-semibold cursor-pointer">Kiadás</Label>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                                <RadioGroupItem value="income" id="cat-income" />
-                                <Label htmlFor="cat-income" className="text-green-500 font-semibold cursor-pointer">Bevétel</Label>
-                            </div>
-                        </RadioGroup>
-
                         <div className="grid gap-2">
-                            <Label htmlFor="name">Kategória neve</Label>
+                            <Label htmlFor="edit-name">Kategória neve</Label>
                             <Input
-                                id="name"
+                                id="edit-name"
                                 name="name"
+                                defaultValue={category.name}
                                 placeholder="Pl. Sport, Ajándék, Bónusz..."
                                 required
                             />
@@ -75,18 +73,18 @@ export function AddCategoryDialog() {
                         </div>
 
                         <div className="grid gap-2">
-                            <Label htmlFor="color">Szín választása</Label>
+                            <Label htmlFor="edit-color">Szín választása</Label>
                             <Input
-                                id="color"
+                                id="edit-color"
                                 name="color"
                                 type="color"
-                                defaultValue="#3b82f6"
+                                defaultValue={category.color || '#3b82f6'}
                                 className="h-10 p-1"
                             />
                         </div>
                     </div>
                     <DialogFooter>
-                        <Button type="submit" className="w-full">Kategória létrehozása</Button>
+                        <Button type="submit" className="w-full">Mentés</Button>
                     </DialogFooter>
                 </form>
             </DialogContent>

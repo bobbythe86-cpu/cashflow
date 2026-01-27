@@ -17,6 +17,9 @@ export interface Category {
     icon: string | null;
     color: string | null;
     created_at: string;
+    transactionCount?: number;
+    totalAmount?: number;
+    lastUsed?: string | null;
 }
 
 export interface Budget {
