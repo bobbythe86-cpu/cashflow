@@ -154,16 +154,42 @@ export async function updateSavingsAmount(id: string, newAmount: number, walletI
     return { success: true }
 }
 
-export async function deleteSavingsGoal(id: string) {
+export async function deleteSavingsGoal(id: string, returnToWalletId?: string) {
     if (!isConfigured()) return { success: true }
 
     const supabase = createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { error: 'Bejelentkezés szükséges' }
+
+    // If we need to return funds, we must fetch the goal first
+    if (returnToWalletId) {
+        const { data: goal, error: fetchError } = await supabase
+            .from('savings_goals')
+            .select('*')
+            .eq('id', id)
+            .single()
+
+        if (!fetchError && goal && goal.current_amount > 0) {
+            // Create transaction record to return funds
+            await supabase.from('transactions').insert({
+                user_id: user.id,
+                amount: goal.current_amount,
+                type: 'income',
+                description: `Megtakarítás visszatöltése: ${goal.name}`,
+                wallet_id: returnToWalletId,
+                date: new Date().toISOString().split('T')[0],
+                category_id: null
+            })
+        }
+    }
+
     const { error } = await supabase.from('savings_goals').delete().eq('id', id)
 
     if (error) return { error: error.message }
 
     revalidatePath('/savings')
     revalidatePath('/dashboard')
+    revalidatePath('/transactions')
     return { success: true }
 }
 

@@ -38,6 +38,8 @@ export function SavingsDetailsDialog({ goal, children }: SavingsDetailsDialogPro
     const [open, setOpen] = useState(false)
     const [amount, setAmount] = useState('')
     const [loading, setLoading] = useState(false)
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+    const [returnBalance, setReturnBalance] = useState(goal.current_amount > 0)
 
     // Recurring payment state
     const [recurringEnabled, setRecurringEnabled] = useState(goal.recurring_enabled || false)
@@ -78,11 +80,14 @@ export function SavingsDetailsDialog({ goal, children }: SavingsDetailsDialogPro
     }
 
     async function handleDelete() {
-        if (confirm('Biztosan törölni szeretnéd ezt a célt?')) {
-            setLoading(true)
-            await deleteSavingsGoal(goal.id)
+        setLoading(true)
+        const result = await deleteSavingsGoal(goal.id, returnBalance ? selectedWallet : undefined)
+        if (result.error) {
+            alert(result.error)
+        } else {
             setOpen(false)
         }
+        setLoading(false)
     }
 
     async function handleSaveRecurring() {
@@ -284,18 +289,72 @@ export function SavingsDetailsDialog({ goal, children }: SavingsDetailsDialogPro
                     </div>
                 </div>
 
-                <DialogFooter className="sm:justify-between flex-row items-center">
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={handleDelete}
-                        className="text-muted-foreground hover:text-destructive"
-                    >
-                        <Trash2 className="w-4 h-4 mr-2" /> Törlés
-                    </Button>
-                    <Button variant="secondary" onClick={() => setOpen(false)}>
-                        Bezárás
-                    </Button>
+                <DialogFooter className="sm:justify-between flex-row items-center border-t border-border/50 pt-4">
+                    {showDeleteConfirm ? (
+                        <div className="w-full space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                            <div className="bg-destructive/10 p-4 rounded-xl border border-destructive/20">
+                                <p className="text-sm font-medium text-destructive mb-3">Biztosan törölni szeretnéd ezt a célt?</p>
+
+                                {goal.current_amount > 0 && (
+                                    <div className="space-y-3">
+                                        <div className="flex items-center gap-2">
+                                            <input
+                                                type="checkbox"
+                                                id="return-balance"
+                                                checked={returnBalance}
+                                                onChange={(e) => setReturnBalance(e.target.checked)}
+                                                className="rounded border-gray-300 text-primary focus:ring-primary"
+                                            />
+                                            <label htmlFor="return-balance" className="text-xs text-muted-foreground cursor-pointer">
+                                                A meglévő <span className="font-bold text-foreground">{goal.current_amount.toLocaleString()} Ft</span> visszatöltése a pénztárcába
+                                            </label>
+                                        </div>
+
+                                        {returnBalance && (
+                                            <div className="space-y-1">
+                                                <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Cél pénztárca</Label>
+                                                <Select value={selectedWallet} onValueChange={setSelectedWallet}>
+                                                    <SelectTrigger className="bg-background h-8 text-xs">
+                                                        <SelectValue placeholder="Válassz tárcát" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        {wallets.map(w => (
+                                                            <SelectItem key={w.id} value={w.id}>
+                                                                {w.name}
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="flex justify-end gap-2">
+                                <Button variant="ghost" size="sm" onClick={() => setShowDeleteConfirm(false)} disabled={loading}>
+                                    Mégse
+                                </Button>
+                                <Button variant="destructive" size="sm" onClick={handleDelete} disabled={loading}>
+                                    {loading ? 'Törlés...' : 'Igen, törlöm'}
+                                </Button>
+                            </div>
+                        </div>
+                    ) : (
+                        <>
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setShowDeleteConfirm(true)}
+                                className="text-muted-foreground hover:text-destructive"
+                            >
+                                <Trash2 className="w-4 h-4 mr-2" /> Törlés
+                            </Button>
+                            <Button variant="secondary" onClick={() => setOpen(false)}>
+                                Bezárás
+                            </Button>
+                        </>
+                    )}
                 </DialogFooter>
             </DialogContent>
         </Dialog>
