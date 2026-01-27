@@ -50,10 +50,12 @@ export function AddRecurringTransactionDialog() {
         const result = await createRecurringTransaction(formData)
         if (result.success) {
             setOpen(false)
-            // Reset form defaults if needed, though unmount handles it mostly
+            // Reset form defaults
             setType('expense')
             setFrequency('monthly')
             setCategoryId('')
+        } else {
+            alert(`Hiba történt: ${result.error}`)
         }
     }
 
