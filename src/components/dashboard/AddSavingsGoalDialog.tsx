@@ -16,8 +16,20 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { createSavingsGoal } from '@/actions/savings'
 
-export function AddSavingsGoalDialog() {
-    const [open, setOpen] = useState(false)
+interface AddSavingsGoalDialogProps {
+    initialData?: {
+        name: string;
+        target_amount: number;
+    };
+    trigger?: React.ReactNode;
+    open?: boolean;
+    onOpenChange?: (open: boolean) => void;
+}
+
+export function AddSavingsGoalDialog({ initialData, trigger, open: controlledOpen, onOpenChange }: AddSavingsGoalDialogProps) {
+    const [internalOpen, setInternalOpen] = useState(false)
+    const open = controlledOpen !== undefined ? controlledOpen : internalOpen
+    const setOpen = onOpenChange !== undefined ? onOpenChange : setInternalOpen
     const [loading, setLoading] = useState(false)
 
     async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -39,9 +51,11 @@ export function AddSavingsGoalDialog() {
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button className="gap-2 rounded-xl">
-                    <Plus className="w-4 h-4" /> Új cél kitűzése
-                </Button>
+                {trigger || (
+                    <Button className="gap-2 rounded-xl">
+                        <Plus className="w-4 h-4" /> Új cél kitűzése
+                    </Button>
+                )}
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px] bg-background border-border/50 shadow-2xl">
                 <form onSubmit={handleSubmit}>
@@ -54,7 +68,14 @@ export function AddSavingsGoalDialog() {
                     <div className="grid gap-6 py-6">
                         <div className="grid gap-2">
                             <Label htmlFor="name">Megnevezés</Label>
-                            <Input id="name" name="name" placeholder="pl. Lakás önrész, Revolut megtakarítás" required className="rounded-xl" />
+                            <Input
+                                id="name"
+                                name="name"
+                                placeholder="pl. Lakás önrész, Revolut megtakarítás"
+                                required
+                                className="rounded-xl"
+                                defaultValue={initialData?.name}
+                            />
                         </div>
                         <div className="grid gap-2">
                             <Label htmlFor="target_amount">Célösszeg (Ft)</Label>
@@ -65,6 +86,7 @@ export function AddSavingsGoalDialog() {
                                 placeholder="pl. 1000000"
                                 required
                                 className="rounded-xl"
+                                defaultValue={initialData?.target_amount}
                             />
                         </div>
                         <div className="grid gap-2">

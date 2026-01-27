@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Progress } from "@/components/ui/progress"
 import { Flame, ShieldAlert, TrendingUp, Calendar, ArrowRight, PiggyBank } from "lucide-react"
 import { getFIREData, getEmergencyFundRecommendation } from "@/actions/analytics"
+import { AddSavingsGoalDialog } from "./AddSavingsGoalDialog"
 
 interface FIREData {
     fireTarget: number;
@@ -107,20 +108,30 @@ export function SavingsCalculators() {
                             <div className="space-y-4">
                                 <h4 className="text-sm font-bold uppercase tracking-widest opacity-60">Ajánlott Tartalékok</h4>
                                 <div className="grid gap-3">
-                                    <div className="p-4 bg-amber-500/5 rounded-2xl border border-amber-500/10 flex justify-between items-center group hover:bg-amber-500/10 transition-colors">
-                                        <div>
-                                            <div className="text-xs font-bold text-amber-500 uppercase">3 Havi Biztonsági</div>
-                                            <div className="text-xl font-black">{emergencyData.threeMonths.toLocaleString()} Ft</div>
-                                        </div>
-                                        <ArrowRight className="w-5 h-5 text-amber-500 opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0" />
-                                    </div>
-                                    <div className="p-4 bg-red-500/5 rounded-2xl border border-red-500/10 flex justify-between items-center group hover:bg-red-500/10 transition-colors">
-                                        <div>
-                                            <div className="text-xs font-bold text-red-500 uppercase">6 Havi Teljes Biztonság</div>
-                                            <div className="text-xl font-black">{emergencyData.sixMonths.toLocaleString()} Ft</div>
-                                        </div>
-                                        <ArrowRight className="w-5 h-5 text-red-500 opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0" />
-                                    </div>
+                                    <AddSavingsGoalDialog
+                                        initialData={{ name: 'Vészhelyzeti tartalék (3 hó)', target_amount: emergencyData.threeMonths }}
+                                        trigger={
+                                            <div className="p-4 bg-amber-500/5 rounded-2xl border border-amber-500/10 flex justify-between items-center group hover:bg-amber-500/10 transition-colors cursor-pointer">
+                                                <div>
+                                                    <div className="text-xs font-bold text-amber-500 uppercase">3 Havi Biztonsági</div>
+                                                    <div className="text-xl font-black">{emergencyData.threeMonths.toLocaleString()} Ft</div>
+                                                </div>
+                                                <ArrowRight className="w-5 h-5 text-amber-500 opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0" />
+                                            </div>
+                                        }
+                                    />
+                                    <AddSavingsGoalDialog
+                                        initialData={{ name: 'Vészhelyzeti tartalék (6 hó)', target_amount: emergencyData.sixMonths }}
+                                        trigger={
+                                            <div className="p-4 bg-red-500/5 rounded-2xl border border-red-500/10 flex justify-between items-center group hover:bg-red-500/10 transition-colors cursor-pointer">
+                                                <div>
+                                                    <div className="text-xs font-bold text-red-500 uppercase">6 Havi Teljes Biztonság</div>
+                                                    <div className="text-xl font-black">{emergencyData.sixMonths.toLocaleString()} Ft</div>
+                                                </div>
+                                                <ArrowRight className="w-5 h-5 text-red-500 opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0" />
+                                            </div>
+                                        }
+                                    />
                                 </div>
                             </div>
 
@@ -135,9 +146,14 @@ export function SavingsCalculators() {
                                         Egy váratlan esemény (pl. munkahely elvesztése) esetén egy tartalék segít megőrizni a nyugalmadat és a pénzügyi stabilitásodat.
                                     </p>
                                 </div>
-                                <button className="w-full py-3 bg-primary text-white font-bold rounded-2xl shadow-lg shadow-primary/20 hover:scale-[1.02] transition-transform">
-                                    Tartalék Cél Létrehozása
-                                </button>
+                                <AddSavingsGoalDialog
+                                    initialData={{ name: 'Vészhelyzeti tartalék', target_amount: emergencyData.sixMonths }}
+                                    trigger={
+                                        <button className="w-full py-3 bg-primary text-white font-bold rounded-2xl shadow-lg shadow-primary/20 hover:scale-[1.02] transition-transform">
+                                            Tartalék Cél Létrehozása
+                                        </button>
+                                    }
+                                />
                             </div>
                         </div>
                     </TabsContent>
