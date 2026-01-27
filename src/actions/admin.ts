@@ -96,7 +96,13 @@ export async function resetAccount() {
     // 5. Delete milestones / achievements
     await supabase.from('milestones').delete().eq('user_id', user.id)
 
-    // 6. Delete suggestions created by this admin (optional, but keep it clean)
+    // 6. Delete budgets
+    await supabase.from('budgets').delete().eq('user_id', user.id)
+
+    // 7. Delete custom categories (NOT the ones where user_id is null)
+    await supabase.from('categories').delete().eq('user_id', user.id)
+
+    // 8. Delete suggestions created by this admin
     await supabase.from('suggestions').delete().eq('user_id', user.id)
 
     revalidatePath('/')
@@ -105,6 +111,7 @@ export async function resetAccount() {
     revalidatePath('/transactions')
     revalidatePath('/wallets')
     revalidatePath('/admin')
+    revalidatePath('/reports')
 
     return { success: true }
 }

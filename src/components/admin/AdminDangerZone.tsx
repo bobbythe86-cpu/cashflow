@@ -37,19 +37,19 @@ export function AdminDangerZone() {
             <CardHeader className="bg-destructive/5 border-b border-destructive/10">
                 <div className="flex items-center gap-2 text-destructive">
                     <AlertTriangle className="w-5 h-5" />
-                    <CardTitle>Veszélyes Zóna</CardTitle>
+                    <CardTitle>Veszélyes Zóna (Saját Adatok)</CardTitle>
                 </div>
                 <CardDescription>
-                    Ezek a műveletek véglegesek és nem vonhatók vissza. Csak teszteléshez ajánlott!
+                    Ez a művelet CSAK A TE ADMIN FIÓKOD adatait törli véglegesen. Más felhasználókat nem érint.
                 </CardDescription>
             </CardHeader>
             <CardContent className="p-6 space-y-4">
                 <div className="flex items-center justify-between gap-4 p-4 rounded-2xl bg-destructive/5 border border-destructive/10">
                     <div className="space-y-1">
-                        <h4 className="font-bold text-destructive">Adatok teljes törlése</h4>
+                        <h4 className="font-bold text-destructive">Saját adatok teljes törlése</h4>
                         <p className="text-sm text-muted-foreground leading-relaxed">
-                            Minden tranzakció, megtakarítási cél, rendszeres utalás és mérföldkő törlésre kerül.
-                            A pénztárcák egyenlege nullázódik.
+                            Minden tranzakciód, megtakarításod, költségvetésed és egyéni kategóriád törlésre kerül.
+                            A pénztárcáid egyenlege nullázódik.
                         </p>
                     </div>
                     <Button
@@ -61,11 +61,11 @@ export function AdminDangerZone() {
                         {loading ? (
                             <Loader2 className="w-4 h-4 animate-spin mr-2" />
                         ) : confirming ? (
-                            'Biztos benne?'
+                            'Biztosan törlöd a SAJÁT adataid?'
                         ) : (
                             <>
                                 <RefreshCcw className="w-4 h-4 mr-2" />
-                                Teljes Reset
+                                Saját Reset
                             </>
                         )}
                     </Button>
