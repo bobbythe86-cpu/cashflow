@@ -110,24 +110,25 @@ export function AddRecurringTransactionDialog() {
                             />
                         </div>
 
+                        <div className="grid gap-2">
+                            <Label htmlFor="frequency">Gyakoriság</Label>
+                            <Select
+                                value={frequency}
+                                onValueChange={(v) => setFrequency(v as RecurringFrequency)}
+                            >
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Válassz" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="daily">Napi</SelectItem>
+                                    <SelectItem value="weekly">Heti</SelectItem>
+                                    <SelectItem value="monthly">Havi</SelectItem>
+                                    <SelectItem value="yearly">Éves</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+
                         <div className="grid grid-cols-2 gap-4">
-                            <div className="grid gap-2">
-                                <Label htmlFor="frequency">Gyakoriság</Label>
-                                <Select
-                                    value={frequency}
-                                    onValueChange={(v) => setFrequency(v as RecurringFrequency)}
-                                >
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Válassz" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="daily">Napi</SelectItem>
-                                        <SelectItem value="weekly">Heti</SelectItem>
-                                        <SelectItem value="monthly">Havi</SelectItem>
-                                        <SelectItem value="yearly">Éves</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
                             <div className="grid gap-2">
                                 <Label htmlFor="start_date">Kezdő dátum</Label>
                                 <Input
@@ -136,6 +137,15 @@ export function AddRecurringTransactionDialog() {
                                     type="date"
                                     defaultValue={new Date().toISOString().split('T')[0]}
                                     required
+                                />
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="end_date">Végső dátum (Opc.)</Label>
+                                <Input
+                                    id="end_date"
+                                    name="end_date"
+                                    type="date"
+                                    placeholder="Nem kötelező"
                                 />
                             </div>
                         </div>

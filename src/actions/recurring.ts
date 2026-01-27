@@ -53,6 +53,15 @@ export async function syncRecurringTransactions() {
         let currentDate = startOfDay(parseISO(item.next_date || item.start_date))
 
         while (isBefore(currentDate, today) || isEqual(currentDate, today)) {
+            // Check if we passed the end_date
+            if (item.end_date && isAfter(currentDate, startOfDay(parseISO(item.end_date)))) {
+                await supabase
+                    .from('recurring_transactions')
+                    .update({ is_active: false })
+                    .eq('id', item.id)
+                break
+            }
+
             // Create transaction
             await supabase.from('transactions').insert({
                 user_id: user.id,
@@ -73,7 +82,14 @@ export async function syncRecurringTransactions() {
             if (isAfter(currentDate, today)) break
         }
 
-        // Update the recurring entry with the next date
+        // If active, update next_date
+        // If we deactivated it above (break), we don't strictly need to update next_date because it won't be queried,
+        // but it's fine to leave this update here or wrap it.
+        // Actually if we broke because of end_date, we might not want to update next_date to something far in future. 
+        // But simpler: just update it.
+
+        // We need to check if it's still active to update next_date meaningfully, 
+        // but updating it anyway is safe.
         await supabase
             .from('recurring_transactions')
             .update({ next_date: format(currentDate, 'yyyy-MM-dd') })
@@ -94,6 +110,7 @@ export async function createRecurringTransaction(formData: FormData) {
     const type = formData.get('type') as TransactionType
     const frequency = formData.get('frequency') as RecurringFrequency
     const start_date = formData.get('start_date') as string
+    const end_date = formData.get('end_date') as string || null
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return { error: 'Bejelentkezés szükséges' }
@@ -106,6 +123,7 @@ export async function createRecurringTransaction(formData: FormData) {
         type,
         frequency,
         start_date,
+        end_date,
         is_active: true
     })
 

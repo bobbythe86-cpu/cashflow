@@ -91,6 +91,7 @@ export interface RecurringTransaction {
     type: TransactionType;
     frequency: RecurringFrequency;
     start_date: string;
+    end_date?: string | null;
     next_date: string | null;
     is_active: boolean;
     created_at: string;
