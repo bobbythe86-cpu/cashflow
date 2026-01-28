@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Plus } from 'lucide-react'
+import { Plus, ArrowRightLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
     Dialog,
@@ -22,7 +22,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
-import { createTransaction } from '@/actions/transactions'
+import { createTransaction, transferFunds } from '@/actions/transactions'
 import { getCategories } from '@/actions/categories'
 import { getWallets } from '@/actions/wallets'
 import { Category, Wallet } from '@/types'
@@ -31,9 +31,11 @@ export function AddTransactionDialog() {
     const [open, setOpen] = useState(false)
     const [categories, setCategories] = useState<Category[]>([])
     const [wallets, setWallets] = useState<Wallet[]>([])
-    const [type, setType] = useState<'income' | 'expense'>('expense')
+    const [type, setType] = useState<'income' | 'expense' | 'transfer'>('expense')
+    const [loading, setLoading] = useState(false)
 
     useEffect(() => {
+        if (!open) return
         async function fetchData() {
             const [cats, walls] = await Promise.all([
                 getCategories(),
@@ -43,16 +45,26 @@ export function AddTransactionDialog() {
             setWallets(walls as Wallet[])
         }
         fetchData()
-    }, [])
+    }, [open])
 
-    async function handleSubmit(formData: FormData) {
-        const result = await createTransaction(formData)
+    async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+        e.preventDefault()
+        setLoading(true)
+        const formData = new FormData(e.currentTarget)
+
+        const result = type === 'transfer'
+            ? await transferFunds(formData)
+            : await createTransaction(formData)
+
         if (result.success) {
             setOpen(false)
+        } else {
+            alert(result.error)
         }
+        setLoading(false)
     }
 
-    const filteredCategories = categories.filter(c => c.type === type)
+    const filteredCategories = categories.filter(c => c.type === (type === 'transfer' ? 'expense' : type))
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
@@ -63,19 +75,19 @@ export function AddTransactionDialog() {
                 </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px] bg-background border-border/50 shadow-2xl">
-                <form action={handleSubmit}>
+                <form onSubmit={handleSubmit}>
                     <DialogHeader>
                         <DialogTitle>Új Tranzakció</DialogTitle>
                         <DialogDescription>
-                            Rögzítsen egy új bevételt vagy kiadást. Kattintson a mentésre ha végzett.
+                            Rögzítsen egy új bevételt, kiadást vagy pénztárcák közötti átvezetést.
                         </DialogDescription>
                     </DialogHeader>
                     <div className="grid gap-6 py-4">
                         <RadioGroup
                             defaultValue="expense"
                             name="type"
-                            className="flex gap-4"
-                            onValueChange={(v) => setType(v as 'income' | 'expense')}
+                            className="flex flex-wrap gap-4"
+                            onValueChange={(v: "income" | "expense" | "transfer") => setType(v)}
                         >
                             <div className="flex items-center space-x-2">
                                 <RadioGroupItem value="expense" id="expense" />
@@ -84,6 +96,10 @@ export function AddTransactionDialog() {
                             <div className="flex items-center space-x-2">
                                 <RadioGroupItem value="income" id="income" />
                                 <Label htmlFor="income" className="text-green-500 font-semibold cursor-pointer">Bevétel</Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                                <RadioGroupItem value="transfer" id="transfer" />
+                                <Label htmlFor="transfer" className="text-blue-500 font-semibold cursor-pointer">Átvezetés</Label>
                             </div>
                         </RadioGroup>
 
@@ -100,44 +116,84 @@ export function AddTransactionDialog() {
                             />
                         </div>
 
-                        <div className="grid gap-2">
-                            <Label htmlFor="category_id">Kategória</Label>
-                            <Select name="category_id">
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Válassz kategóriát" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {filteredCategories.map((cat) => (
-                                        <SelectItem key={cat.id} value={cat.id}>
-                                            {cat.name}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
+                        {type !== 'transfer' ? (
+                            <>
+                                <div className="grid gap-2">
+                                    <Label htmlFor="category_id">Kategória</Label>
+                                    <Select name="category_id">
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Válassz kategóriát" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {filteredCategories.map((cat) => (
+                                                <SelectItem key={cat.id} value={cat.id}>
+                                                    {cat.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
 
-                        <div className="grid gap-2">
-                            <Label htmlFor="wallet_id">Pénztárca</Label>
-                            <Select name="wallet_id" defaultValue={wallets[0]?.id}>
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Válassz pénztárcát" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {wallets.map((wallet) => (
-                                        <SelectItem key={wallet.id} value={wallet.id}>
-                                            {wallet.name} ({new Intl.NumberFormat('hu-HU', { style: 'currency', currency: wallet.currency }).format(wallet.balance)})
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
+                                <div className="grid gap-2">
+                                    <Label htmlFor="wallet_id">Pénztárca</Label>
+                                    <Select name="wallet_id" defaultValue={wallets[0]?.id}>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Válassz pénztárcát" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {wallets.map((wallet) => (
+                                                <SelectItem key={wallet.id} value={wallet.id}>
+                                                    {wallet.name} ({wallet.balance.toLocaleString()} Ft)
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            </>
+                        ) : (
+                            <div className="space-y-4 p-4 rounded-2xl bg-primary/5 border border-primary/10">
+                                <div className="grid gap-2">
+                                    <Label htmlFor="from_wallet_id">Honnan</Label>
+                                    <Select name="from_wallet_id">
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Forrás tárca" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {wallets.map((wallet) => (
+                                                <SelectItem key={wallet.id} value={wallet.id}>
+                                                    {wallet.name} ({wallet.balance.toLocaleString()} Ft)
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div className="flex justify-center">
+                                    <ArrowRightLeft className="w-4 h-4 text-primary opacity-50" />
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label htmlFor="to_wallet_id">Hova</Label>
+                                    <Select name="to_wallet_id">
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Cél tárca" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {wallets.filter(w => w.id !== wallets[0]?.id).map((wallet) => (
+                                                <SelectItem key={wallet.id} value={wallet.id}>
+                                                    {wallet.name} ({wallet.balance.toLocaleString()} Ft)
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            </div>
+                        )}
 
                         <div className="grid gap-2">
                             <Label htmlFor="description">Leírás</Label>
                             <Input
                                 id="description"
                                 name="description"
-                                placeholder="Részletek..."
+                                placeholder={type === 'transfer' ? "pl. Készpénz felvétel" : "Részletek..."}
                                 required
                             />
                         </div>
@@ -154,7 +210,9 @@ export function AddTransactionDialog() {
                         </div>
                     </div>
                     <DialogFooter>
-                        <Button type="submit" className="w-full">Tranzakció mentése</Button>
+                        <Button type="submit" disabled={loading} className="w-full">
+                            {loading ? 'Mentés...' : 'Tranzakció mentése'}
+                        </Button>
                     </DialogFooter>
                 </form>
             </DialogContent>

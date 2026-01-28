@@ -63,7 +63,7 @@ export default function ReportsPage() {
         const link = document.createElement('a')
         const url = URL.createObjectURL(blob)
         link.setAttribute('href', url)
-        link.setAttribute('download', `cashflow_teljes_riport_${format(new Date(), 'yyyyMMdd')}.csv`)
+        link.setAttribute('download', `modus_teljes_riport_${format(new Date(), 'yyyyMMdd')}.csv`)
         link.style.visibility = 'hidden'
         document.body.appendChild(link)
         link.click()

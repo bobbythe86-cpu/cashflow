@@ -31,7 +31,7 @@ export function Sidebar({ role }: { role?: string }) {
         <div className="hidden lg:flex flex-col w-64 bg-card border-r h-screen sticky top-0">
             <div className="p-6">
                 <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
-                    CashFlow
+                    Modus
                 </h1>
             </div>
 

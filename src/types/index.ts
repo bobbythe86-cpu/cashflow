@@ -58,7 +58,8 @@ export interface Transaction {
     type: TransactionType;
     created_at: string;
     category?: Category;
-    wallet?: Wallet;
+    wallet?: Wallet | null;
+    to_wallet?: Wallet | null;
 }
 
 export interface SavingsGoal {

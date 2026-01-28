@@ -15,7 +15,7 @@ export interface ForecastData {
     balance: number;
 }
 
-export async function getCashflowForecast() {
+export async function getModusForecast() {
     const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 

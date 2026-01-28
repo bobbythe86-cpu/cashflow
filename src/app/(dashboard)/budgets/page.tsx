@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { PiggyBank, TrendingDown, AlertCircle, CheckCircle2 } from "lucide-react"
 
 export const metadata = {
-    title: 'Költségvetés | CashFlow',
+    title: 'Költségvetés | Modus',
     description: 'Kezeld a havi költségvetésedet és kövesd nyomon a kiadásaidat.',
 }
 

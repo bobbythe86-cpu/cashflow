@@ -31,7 +31,7 @@ export default function RegisterPage() {
             <Card className="w-full max-w-md border-none shadow-2xl bg-background/80 backdrop-blur-xl animate-in fade-in zoom-in duration-300">
                 <CardHeader className="space-y-1 text-center">
                     <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent mb-2">
-                        CashFlow
+                        Modus
                     </h1>
                     <CardTitle className="text-2xl">Fiók létrehozása</CardTitle>
                     <CardDescription>

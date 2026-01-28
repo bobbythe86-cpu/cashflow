@@ -26,7 +26,11 @@ export async function getTransactions() {
     if (!user) return []
     const { data: transactions } = await supabase.from('transactions').select('*, category:categories(*)').eq('user_id', user.id).order('date', { ascending: false })
     const { data: wallets } = await supabase.from('wallets').select('*').eq('user_id', user.id)
-    return (transactions || []).map(t => ({ ...t, wallet: wallets?.find(w => w.id === t.wallet_id) || null }))
+    return (transactions || []).map(t => ({
+        ...t,
+        wallet: wallets?.find(w => w.id === t.wallet_id) || null,
+        to_wallet: wallets?.find(w => w.id === t.to_wallet_id) || null
+    }))
 }
 
 export async function getDashboardStats() {
@@ -136,4 +140,81 @@ export async function deleteTransaction(id: string) {
     const { error } = await supabase.from('transactions').delete().eq('id', id)
     if (error) return { error: error.message }
     revalidatePath('/dashboard'); revalidatePath('/transactions'); return { success: true }
+}
+
+export async function updateTransaction(id: string, formData: FormData) {
+    if (!isConfigured()) return { success: true }
+    const supabase = createClient()
+    const amount = parseFloat(formData.get('amount') as string)
+    const description = formData.get('description') as string
+    const date = formData.get('date') as string
+    const type = formData.get('type') as TransactionType
+    const category_id = formData.get('category_id') as string
+    const wallet_id = formData.get('wallet_id') as string
+
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { error: 'Bejelentkezés szükséges' }
+
+    const { error } = await supabase
+        .from('transactions')
+        .update({
+            amount,
+            description,
+            date,
+            type,
+            category_id: category_id || null,
+            wallet_id: wallet_id || null
+        })
+        .eq('id', id)
+        .eq('user_id', user.id)
+
+    if (error) return { error: error.message }
+
+    revalidatePath('/dashboard')
+    revalidatePath('/transactions')
+    return { success: true }
+}
+
+export async function transferFunds(formData: FormData) {
+    if (!isConfigured()) return { success: true }
+    const supabase = createClient()
+    const amount = parseFloat(formData.get('amount') as string)
+    const description = formData.get('description') as string
+    const date = formData.get('date') as string
+    const from_wallet_id = formData.get('from_wallet_id') as string
+    const to_wallet_id = formData.get('to_wallet_id') as string
+
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { error: 'Bejelentkezés szükséges' }
+
+    // Check if source wallet has enough funds
+    const { data: fromWallet } = await supabase
+        .from('wallets')
+        .select('balance, name')
+        .eq('id', from_wallet_id)
+        .single()
+
+    if (fromWallet && fromWallet.balance < amount) {
+        return { error: `Nincs elég fedezet a(z) ${fromWallet.name} pénztárcában!` }
+    }
+
+    // A transfer is a single transaction with wallet_id (from) and to_wallet_id (to)
+    // The database trigger handles updating both balances
+    const { error } = await supabase.from('transactions').insert({
+        user_id: user.id,
+        amount,
+        description: description || 'Átvezetés',
+        date,
+        type: 'expense',
+        wallet_id: from_wallet_id,
+        to_wallet_id: to_wallet_id,
+        category_id: null // System movement
+    })
+
+    if (error) return { error: error.message }
+
+    revalidatePath('/dashboard')
+    revalidatePath('/transactions')
+    revalidatePath('/wallets')
+    return { success: true }
 }

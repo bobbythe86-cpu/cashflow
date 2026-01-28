@@ -1,4 +1,4 @@
-# 🚀 CashFlow App Telepítése Vercel-re
+# 🚀 Modus App Telepítése Vercel-re
 
 ## Miért Vercel?
 - ✅ **Ingyenes** (hobby projektekhez)
@@ -18,13 +18,13 @@ Ha még nincs Git repo, inicializáld:
 ```bash
 git init
 git add .
-git commit -m "Initial commit - CashFlow App"
+git commit -m "Initial commit - Modus App"
 ```
 
 ### 2. GitHub Repository létrehozása
 
 1. Menj a https://github.com/new címre
-2. Repository név: `cashflow-app` (vagy bármi más)
+2. Repository név: `modus-app` (vagy bármi más)
 3. **Private** vagy **Public** (te döntöd)
 4. **NE** adj hozzá README-t, .gitignore-t (már van)
 5. Kattints **"Create repository"**
@@ -34,7 +34,7 @@ git commit -m "Initial commit - CashFlow App"
 Másold be a GitHub által megadott parancsokat:
 
 ```bash
-git remote add origin https://github.com/FELHASZNALONEV/cashflow-app.git
+git remote add origin https://github.com/FELHASZNALONEV/modus-app.git
 git branch -M main
 git push -u origin main
 ```
@@ -48,7 +48,7 @@ git push -u origin main
 ### 5. Projekt Deploy-olása
 
 1. A Vercel Dashboard-on kattints **"Add New Project"**
-2. Válaszd ki a `cashflow-app` repository-t
+2. Válaszd ki a `modus-app` repository-t
 3. **Framework Preset:** Next.js (automatikusan felismeri)
 4. **Root Directory:** `./` (alapértelmezett)
 5. **Build Command:** `npm run build` (automatikusan)
@@ -75,8 +75,24 @@ Kattints **"Deploy"** → Várj 2-3 percet ☕
 
 Az alkalmazásod elérhető lesz egy ilyen címen:
 ```
-https://cashflow-app-XXXXXXX.vercel.app
+https://modus-app-XXXXXXX.vercel.app
 ```
+
+### 🌍 Saját domain vagy aldomain beállítása
+
+1.  A Vercel Dashboard-on menj a **Settings > Domains** fülre.
+2.  Írd be a kívánt címet (pl. `vagyonom.hu` vagy `app.sajatneved.hu`) és kattints az **Add** gombra.
+3.  **Aldomain (pl. `app.sajatdomain.hu`) esetén:**
+    - A Vercel ad egy **CNAME** rekordot (pl. `cname.vercel-dns.com`).
+    - Menj a domain regisztrátorod DNS kezelőjéhez.
+    - Adj hozzá egy új **CNAME** rekordot:
+        - Host/Név: `app` (vagy amit választottál)
+        - Érték: `cname.vercel-dns.com`
+4.  **Fő domain (pl. `sajatdomain.hu`) esetén:**
+    - A Vercel általában egy **A rekordot** kér (IP cím).
+    - A DNS kezelőben az `@` (root) rekordot állítsd erre az IP-re.
+
+Pár perc után a Vercel zöldre vált, és kész is!
 
 ### Automatikus deploy
 
@@ -118,6 +134,14 @@ git push
    npm run build
    npm start
    ```
+
+---
+
+### 🆘 Hibaelhárítás (DNS hiba)
+
+**"CNAME should not have the same name as other records" hiba:**
+Ez akkor fordul elő, ha már van egy **NS** (Nameserver) vagy **A** (IP cím) rekordod ugyanarra az aldomainre.
+- **Megoldás:** Töröld az összes meglévő `modus.bobby.hu` rekordot (a korábbi NS rekordokat ÉS az A rekordot is) a DNS kezelődben, és **csak** a CNAME rekordot hagyd meg, amit a Vercel kért.
 
 ---
 

@@ -1,0 +1,47 @@
+﻿node.exe : 
+At line:1 char:1
++ & "C:\Program Files\nodejs
+/node.exe" "C:\Program Files
+\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~
+    + CategoryInfo          
+    : NotSpecified: (:Stri  
+  ng) [], RemoteException
+    + FullyQualifiedErrorId 
+    : NativeCommandError
+ 
+./src/components/dashboard/A
+ddTransactionDialog.tsx
+90:64  Error: Unexpected any
+. Specify a different type. 
+ @typescript-eslint/no-expli
+cit-any
+
+./src/components/dashboard/E
+ditTransactionDialog.tsx
+106:64  Error: Unexpected an
+y. Specify a different type.
+  @typescript-eslint/no-expl
+icit-any
+
+./src/components/dashboard/S
+avingsDetailsDialog.tsx
+166:33  Warning: Using `<img
+>` could result in slower LC
+P and higher bandwidth. Cons
+ider using `<Image />` from 
+`next/image` to automaticall
+y optimize images. This may 
+incur additional usage or co
+st from your provider. See: 
+https://nextjs.org/docs/mess
+ages/no-img-element  @next/n
+ext/no-img-element
+
+info  - Need to disable some
+ ESLint rules? Learn more he
+re: https://nextjs.org/docs/
+basic-features/eslint#disabl
+ing-rules

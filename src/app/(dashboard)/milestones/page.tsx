@@ -3,7 +3,7 @@ import { MilestoneList } from "@/components/dashboard/MilestoneList"
 import { Trophy } from "lucide-react"
 
 export const metadata = {
-    title: 'Mérföldkövek | CashFlow',
+    title: 'Mérföldkövek | Modus',
     description: 'Kövesd nyomon a pénzügyi céljaid és elért eredményeid.',
 }
 

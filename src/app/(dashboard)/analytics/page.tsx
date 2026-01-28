@@ -1,5 +1,5 @@
 import { getTransactions } from "@/actions/transactions"
-import { getCashflowForecast } from "@/actions/analytics"
+import { getModusForecast } from "@/actions/analytics"
 import { CategoryPieChart } from "@/components/dashboard/CategoryPieChart"
 import { MonthlyComparison } from "@/components/dashboard/MonthlyComparison"
 import { ForecastChart } from "@/components/dashboard/ForecastChart"
@@ -9,7 +9,7 @@ import { TrendingUp, Info } from "lucide-react"
 export default async function AnalyticsPage() {
     const [transactions, forecast] = await Promise.all([
         getTransactions(),
-        getCashflowForecast()
+        getModusForecast()
     ])
 
     return (

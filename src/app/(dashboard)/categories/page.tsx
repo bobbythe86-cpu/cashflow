@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Layers } from "lucide-react"
 
 export const metadata = {
-    title: 'Kategóriák | CashFlow',
+    title: 'Kategóriák | Modus',
     description: 'Kezeld a bevételi és kiadási kategóriáidat.',
 }
 

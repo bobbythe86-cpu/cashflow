@@ -15,8 +15,8 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "CashFlow - Pénzügyi Tervező",
-  description: "Vedd át az irányítást a pénzügyeid felett.",
+  title: "Modus - Pénzügyi Tudatosság",
+  description: "Tervezés és egyensúly a pénzügyeidben.",
 };
 
 export default function RootLayout({

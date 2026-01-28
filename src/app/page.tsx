@@ -25,7 +25,7 @@ export default function LandingPage() {
               <BarChart3 className="h-6 w-6 text-primary" />
             </div>
             <span className="text-xl font-bold bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
-              CashFlow
+              Modus
             </span>
           </Link>
           <nav className="hidden md:flex gap-8">
@@ -66,7 +66,7 @@ export default function LandingPage() {
                   <span className="text-gradient">Egyetlen Helyen</span>
                 </h1>
                 <p className="mx-auto max-w-[800px] text-muted-foreground text-lg md:text-xl leading-relaxed animation-delay-200 animate-fade-in-up opacity-0">
-                  A CashFlow nem csak egy költségkövető. Ez az Te személyes pénzügyi központod.
+                  A Modus nem csak egy költségkövető. Ez a Te személyes pénzügyi központod.
                   Lásd át, elemezd és optimalizáld pénzügyeidet profi eszközökkel, egyszerűen.
                 </p>
               </div>
@@ -212,9 +212,9 @@ export default function LandingPage() {
         <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <BarChart3 className="h-5 w-5 text-primary" />
-            <span className="font-semibold text-lg">CashFlow</span>
+            <span className="font-semibold text-lg">Modus</span>
           </div>
-          <p className="text-sm text-muted-foreground">© 2026 CashFlow Inc. Minden jog fenntartva.</p>
+          <p className="text-sm text-muted-foreground">© 2026 Modus Inc. Minden jog fenntartva.</p>
           <nav className="flex gap-6">
             <Link className="text-sm text-muted-foreground hover:text-primary transition-colors" href="#">
               Adatvédelem

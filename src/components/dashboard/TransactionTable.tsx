@@ -13,7 +13,7 @@ import {
 import { format } from "date-fns"
 import { hu } from "date-fns/locale"
 import { cn } from "@/lib/utils"
-import { Trash2, ArrowUpCircle, ArrowDownCircle, Search, FilterX, Download } from "lucide-react"
+import { ArrowUpCircle, ArrowDownCircle, Search, FilterX, Download, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -23,7 +23,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
-import { deleteTransaction } from "@/actions/transactions"
+import { EditTransactionDialog } from "./EditTransactionDialog"
 
 interface TransactionTableProps {
     transactions: Transaction[]
@@ -49,11 +49,6 @@ export function TransactionTable({ transactions }: TransactionTableProps) {
         })
     }, [transactions, searchTerm, typeFilter, categoryFilter])
 
-    async function handleDelete(id: string) {
-        if (confirm('Biztosan törölni szeretnéd ezt a tranzakciót?')) {
-            await deleteTransaction(id)
-        }
-    }
 
     const resetFilters = () => {
         setSearchTerm('')
@@ -163,13 +158,22 @@ export function TransactionTable({ transactions }: TransactionTableProps) {
                                         </div>
                                     </TableCell>
                                     <TableCell>
-                                        <span className="text-xs text-muted-foreground font-medium">
-                                            {t.wallet?.name || "Nincs tárca"}
-                                        </span>
+                                        <div className="flex items-center gap-2 text-xs text-muted-foreground font-medium">
+                                            <span>{t.wallet?.name || "Nincs tárca"}</span>
+                                            {t.to_wallet && (
+                                                <>
+                                                    <ArrowRight className="w-3 h-3 text-blue-500" />
+                                                    <span className="text-blue-500">{t.to_wallet.name}</span>
+                                                </>
+                                            )}
+                                        </div>
                                     </TableCell>
                                     <TableCell>
-                                        <span className="px-2 py-1 rounded-full bg-primary/10 text-primary text-[10px] font-medium uppercase tracking-wider">
-                                            {t.category?.name || "Nincs kategorizálva"}
+                                        <span className={cn(
+                                            "px-2 py-1 rounded-full text-[10px] font-medium uppercase tracking-wider",
+                                            t.to_wallet ? "bg-blue-500/10 text-blue-500" : "bg-primary/10 text-primary"
+                                        )}>
+                                            {t.to_wallet ? "Átvezetés" : (t.category?.name || "Nincs kategorizálva")}
                                         </span>
                                     </TableCell>
                                     <TableCell className={cn(
@@ -179,14 +183,7 @@ export function TransactionTable({ transactions }: TransactionTableProps) {
                                         {t.type === 'income' ? '+' : '-'}{t.amount.toLocaleString()} Ft
                                     </TableCell>
                                     <TableCell>
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            onClick={() => handleDelete(t.id)}
-                                            className="opacity-0 group-hover:opacity-100 text-destructive hover:text-destructive hover:bg-destructive/10 transition-opacity"
-                                        >
-                                            <Trash2 className="w-4 h-4" />
-                                        </Button>
+                                        <EditTransactionDialog transaction={t} />
                                     </TableCell>
                                 </TableRow>
                             ))
