@@ -61,3 +61,22 @@ export async function updateProfile(formData: FormData) {
     revalidatePath('/settings')
     return { success: true }
 }
+
+export async function updateLastSeen() {
+    try {
+        const supabase = createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+
+        if (!user) return
+
+        await supabase
+            .from('profiles')
+            .update({
+                last_seen_at: new Date().toISOString(),
+            })
+            .eq('id', user.id)
+    } catch (e) {
+        // Silent error if column doesn't exist yet
+        console.error('Failed to update last seen:', e)
+    }
+}

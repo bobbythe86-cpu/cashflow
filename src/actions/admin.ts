@@ -30,7 +30,7 @@ export async function getAdminUsers() {
     const { data, error } = await adminSupabase
         .from('profiles')
         .select('*')
-        .order('updated_at', { ascending: false })
+        .order('last_seen_at', { ascending: false, nullsFirst: false })
 
     if (error) {
         console.error('Error fetching admin users:', error)

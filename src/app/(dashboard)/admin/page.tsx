@@ -12,7 +12,7 @@ import {
     TableRow,
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
-import { format } from "date-fns"
+import { format, formatDistanceToNow } from "date-fns"
 import { hu } from "date-fns/locale"
 import { Users, MessageSquare, ShieldCheck, Mail, Clock, ShieldAlert } from "lucide-react"
 import { AdminDangerZone } from "@/components/admin/AdminDangerZone"
@@ -160,7 +160,14 @@ export default async function AdminPage() {
                                                 </Badge>
                                             </TableCell>
                                             <TableCell className="text-xs text-muted-foreground">
-                                                {format(new Date(u.updated_at), 'yyyy. MMM dd.', { locale: hu })}
+                                                <div className="flex flex-col">
+                                                    <span className="font-medium text-foreground">
+                                                        {u.last_seen_at ? formatDistanceToNow(new Date(u.last_seen_at), { addSuffix: true, locale: hu }) : 'Régen'}
+                                                    </span>
+                                                    <span className="text-[10px] opacity-70">
+                                                        {u.last_seen_at ? format(new Date(u.last_seen_at), 'yyyy. MM. dd. HH:mm', { locale: hu }) : 'Nincs adat'}
+                                                    </span>
+                                                </div>
                                             </TableCell>
                                         </TableRow>
                                     ))}

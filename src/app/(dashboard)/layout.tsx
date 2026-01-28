@@ -3,6 +3,7 @@ import { Navbar } from "@/components/layout/Navbar"
 import { getProfile } from "@/actions/profile"
 import { ChangelogBanner } from "@/components/ChangelogBanner"
 import { MobileNav } from "@/components/layout/MobileNav"
+import { UserActivityTracker } from "@/components/layout/UserActivityTracker"
 
 export default async function DashboardLayout({
     children,
@@ -26,6 +27,7 @@ export default async function DashboardLayout({
                 </main>
                 <MobileNav />
             </div>
+            <UserActivityTracker />
         </div>
     )
 }

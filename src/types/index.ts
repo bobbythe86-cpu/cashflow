@@ -7,6 +7,7 @@ export interface Profile {
     avatar_url: string | null;
     role: 'user' | 'admin';
     updated_at: string;
+    last_seen_at?: string;
 }
 
 export interface Category {
